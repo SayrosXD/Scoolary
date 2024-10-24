@@ -147,7 +147,6 @@
 
     .search-menu.active {
       display: block;
-      animation: slideDown 0.3s ease;
     }
 
     @keyframes slideDown {
@@ -187,7 +186,7 @@
       border: none;
       border-radius: 5px;
       cursor: pointer;
-      transition: background-color 0.3s ease;
+      transition: background-color 1s ease;
       font-size: 1em;
     }
 
@@ -321,8 +320,11 @@
       <option value="">Todas las categorías</option>
       <option value="ajedrez">Ajedrez</option>
       <option value="futbol">Fútbol</option>
-      <option value="natacion">Natación</option>
+      <option value="taekwondo">Taekwondo</option>
       <option value="basketball">Basketball</option>
+      <option value="certamen">Certamen</option>
+      <option value="atletismo">Atletismo</option>
+      <option value="yudo">yudo</option>
     </select>
     <button id="searchButton">Buscar</button>
   </div>
@@ -336,7 +338,7 @@
       { 
         file: 'Ajedrez.jpg', 
         category: 'ajedrez', 
-        tags: ['ajedrez', 'tablero', 'juego', 'estrategia'],
+        tags: ['ajedrez', '16 de agosto', '2024', 'estrategia'],
         title: 'Torneo de Ajedrez 2024',
         fecha: '16 de Agosto, 2024',
         descripcion: 'Final del torneo de ajedrez en honor a nuestra señora de la asuncion',
@@ -345,14 +347,44 @@
       },
       { 
         file: 'Futbol_femenino.jpg', 
-        category: 'futbol', 
+        category: 'futbol',
         tags: ['Femenino', 'futbol', '2024'],
         title: 'Campeonato de futbol femenino',
         fecha: '8 de Agosto, 2024',
         descripcion: 'Felicitamos al equipo Sub-Campeón de la liga de fútbol-sala femenino.',
         participantes: 'Séptimo grado "C"',
         logros: 'Ganar el partido con mucho esfuerzo y dedicación'
-      }
+      },
+      {
+        file: 'Certamen.jpg',
+        category: 'certamen',
+        tags: ['Certamen', 'Competencia', '29 de agosto', '2024'],
+        title: 'Aprendiendo para crear, innovando para transformar',
+        fecha: '29 de agosto, 2024',
+        descripcion: 'Ganadores del primer lugar a nivel departamental en el Certamen del Mejor Estudiante de Educación Primaria',
+        participantes: 'Wesley Jareth iglesias, Cristina Nazareth Montalvan Gradiz',
+        logros: 'Ganadorez del certamen del mejor estudiante a nivel departamental'
+      },
+      {
+        file: 'Taekwondo.jpg',
+        category: 'taekwondo',
+        tags: ['Taekwondo', 'Competencia', '15 de junio', '2024'],
+        title: 'Seguimos cosechando exitos deportivos',
+        fecha: '15 de junio',
+        descripcion: 'Por obtener medalla de plata a nivel nacional en el torneo de taekwondo felicitamos al estudiante',
+        participantes: 'Angel Fabricio MaRtinez Sarantes',
+        logros: 'Segundo lugar a nivel nacional en taekwondo'
+      },
+      {
+        file: 'Atletismo.jpg',
+        category: 'atletismo',
+        tags: ['atletismo', 'competencia', '5 de mayo', '2024'],
+        title: 'Felicitamos a nuestro estudiante',
+        fecha: '5 de mayo, 2024',
+        descripcion: 'Por obtener el primer lugar a nivel departamental en salto alto',
+        participantes: 'Jorge Josue Caceres',
+        logros: 'Primer lugar en salto alto'
+      },
     ];
 
     function displayImages(imagesToShow) {
