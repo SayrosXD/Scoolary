@@ -7,41 +7,180 @@
   <style>
     body {
       font-family: 'Arial', sans-serif;
-      background-color: #ffffff;
+      background-color: #FFF8DC;
       color: #333;
       margin: 0;
       padding: 20px;
     }
 
-    h1 {
-      text-align: center;
-      color: #4A90E2;
-      font-size: 2.5em;
-      margin-bottom: 20px;
-    }
-
-    form {
+    .navbar {
+      background-color: #4A90E2;
+      padding: 15px;
       display: flex;
-      justify-content: center;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      box-sizing: border-box;
     }
 
-    input[type="text"], select {
+    .navbar h1 {
+      margin: 0;
+      font-size: 1.5em;
+    }
+
+    .menu-icon {
+      font-size: 1.5em;
+      cursor: pointer;
+    }
+
+    .menu-icon div {
+      width: 25px;
+      height: 3px;
+      background-color: white;
+      margin: 5px 0;
+    }
+
+    .side-menu {
+      position: fixed;
+      top: 0;
+      left: -250px;
+      width: 250px;
+      height: 100vh;
+      background-color: #4A90E2;
+      transition: 0.3s;
+      z-index: 1001;
+      padding-top: 60px;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+    }
+
+    .side-menu.active {
+      left: 0;
+    }
+
+    .side-menu ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .side-menu li {
+      padding: 15px 25px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .side-menu a {
+      color: white;
+      text-decoration: none;
+      font-size: 1.1em;
+      display: block;
+      transition: 0.3s;
+    }
+
+    .side-menu a:hover {
+      padding-left: 10px;
+      color: #FFF8DC;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      display: none;
+      z-index: 1000;
+    }
+
+    .overlay.active {
+      display: block;
+    }
+
+    .search-icon {
+      cursor: pointer;
+      width: 24px;
+      height: 24px;
+      position: relative;
+      margin-right: 20px;
+    }
+
+    .search-icon::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 12px;
+      height: 12px;
+      border: 1px solid white;
+      border-radius: 70%;
+    }
+
+    .search-icon::after {
+      content: '';
+      position: absolute;
+      top: 11px;
+      left: 11px;
+      width: 2px;
+      height: 8px;
+      background: white;
+      transform: rotate(-45deg);
+    }
+
+    .search-menu {
+      display: none;
+      position: fixed;
+      top: 60px;
+      right: 20px;
+      background-color: white;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      border-radius: 8px;
+      z-index: 1000;
+      width: 300px;
+      box-sizing: border-box;
+    }
+
+    .search-menu.active {
+      display: block;
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .search-menu input[type="text"], 
+    .search-menu select {
+      width: 100%;
       padding: 10px;
       border: 2px solid #B3E5FC;
       border-radius: 5px;
-      margin-right: 10px;
+      margin-bottom: 10px;
       outline: none;
       transition: border-color 0.3s ease;
       font-size: 1em;
+      box-sizing: border-box;
     }
 
-    input[type="text"]:focus, select:focus {
+    .search-menu input[type="text"]:focus, 
+    .search-menu select:focus {
       border-color: #4A90E2;
     }
 
-    button {
+    .search-menu button {
+      width: 100%;
       padding: 10px 15px;
       background-color: #4A90E2;
       color: white;
@@ -52,8 +191,16 @@
       font-size: 1em;
     }
 
-    button:hover {
+    .search-menu button:hover {
       background-color: #357ABD;
+    }
+
+    h1 {
+      text-align: center;
+      color: #4A90E2;
+      font-size: 2.5em;
+      margin-top: 80px;
+      margin-bottom: 20px;
     }
 
     #imageDisplay {
@@ -68,7 +215,7 @@
       display: flex;
       width: 100%;
       max-width: 800px;
-      background: #f5f5f5;
+      background: #FFF8DC;
       border-radius: 10px;
       padding: 20px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -121,6 +268,12 @@
     }
 
     @media (max-width: 768px) {
+      .search-menu {
+        width: calc(100% - 40px);
+        right: 50%;
+        transform: translateX(50%);
+      }
+
       .image-container {
         flex-direction: column;
         align-items: center;
@@ -139,19 +292,42 @@
   </style>
 </head>
 <body>
-  <h1>Colegio Inmaculada Concepción</h1>
+  <div class="overlay"></div>
+  
+  <div class="side-menu">
+    <ul>
+      <li><a href="#inicio">Página Principal</a></li>
+      <li><a href="#sobre-nosotros">Sobre Nosotros</a></li>
+      <li><a href="#academico">Académico</a></li>
+      <li><a href="#actividades">Actividades</a></li>
+      <li><a href="#admisiones">Admisiones</a></li>
+      <li><a href="#contacto">Contacto</a></li>
+    </ul>
+  </div>
 
-  <form id="searchForm">
-    <input type="text" name="query" id="searchQuery" placeholder="Buscar imágenes por palabra clave...">
-    <select name="category" id="categorySelect">
+  <div class="navbar">
+    <div class="menu-icon">
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+    <h1>Scholary</h1>
+    <div class="search-icon"></div>
+  </div>
+
+  <div class="search-menu">
+    <input type="text" id="searchQuery" placeholder="Buscar imágenes por palabra clave...">
+    <select id="categorySelect">
       <option value="">Todas las categorías</option>
       <option value="ajedrez">Ajedrez</option>
       <option value="futbol">Fútbol</option>
       <option value="natacion">Natación</option>
       <option value="basketball">Basketball</option>
     </select>
-    <button type="submit">Buscar</button>
-  </form>
+    <button id="searchButton">Buscar</button>
+  </div>
+
+  <h1>Colegio Inmaculada Concepción</h1>
 
   <div id="imageDisplay"></div>
 
@@ -193,8 +369,8 @@
 
         const downloadLink = document.createElement('a');
         downloadLink.className = 'download-link';
-        downloadLink.href = image.file; // Ruta directa a la imagen
-        downloadLink.download = image.file.split('/').pop(); // Nombre del archivo para la descarga
+        downloadLink.href = image.file;
+        downloadLink.download = image.file.split('/').pop();
         downloadLink.innerText = 'Descargar imagen';
 
         const infoDiv = document.createElement('div');
@@ -210,7 +386,7 @@
         
         container.appendChild(imgElement);
         container.appendChild(infoDiv);
-        container.appendChild(downloadLink); // Agregar el enlace de descarga
+        container.appendChild(downloadLink);
         imageDisplay.appendChild(container);
       });
     }
@@ -230,9 +406,22 @@
       });
     }
 
-    document.getElementById('searchForm').addEventListener('submit', function(event) {
-      event.preventDefault();
+    // Funcionalidad del menú de búsqueda
+    const searchIcon = document.querySelector('.search-icon');
+    const searchMenu = document.querySelector('.search-menu');
+    const searchButton = document.getElementById('searchButton');
 
+    searchIcon.addEventListener('click', () => {
+      searchMenu.classList.toggle('active');
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!searchMenu.contains(event.target) && !searchIcon.contains(event.target)) {
+        searchMenu.classList.remove('active');
+      }
+    });
+
+    searchButton.addEventListener('click', function() {
       const query = document.getElementById('searchQuery').value.trim();
       const category = document.getElementById('categorySelect').value;
 
@@ -243,8 +432,34 @@
       } else {
         document.getElementById('imageDisplay').innerHTML = '<p>No se encontraron imágenes que coincidan con tu búsqueda.</p>';
       }
+
+      searchMenu.classList.remove('active');
     });
 
+    // Funcionalidad del menú lateral
+    const menuIcon = document.querySelector('.menu-icon');
+    const sideMenu = document.querySelector('.side-menu');
+    const overlay = document.querySelector('.overlay');
+
+    menuIcon.addEventListener('click', () => {
+      sideMenu.classList.toggle('active');
+      overlay.classList.toggle('active');
+    });
+
+    overlay.addEventListener('click', () => {
+      sideMenu.classList.remove('active');
+      overlay.classList.remove('active');
+    });
+
+    const menuLinks = document.querySelectorAll('.side-menu a');
+    menuLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        sideMenu.classList.remove('active');
+        overlay.classList.remove('active');
+      });
+    });
+
+    // Mostrar imágenes iniciales
     displayImages(images);
   </script>
 </body>
