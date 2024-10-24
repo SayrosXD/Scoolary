@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recursos utilizados</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #FFF8DC;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .navbar {
+      background-color: #4A90E2;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      box-sizing: border-box;
+    }
+
+    .navbar h1 {
+      margin: 0;
+      font-size: 1.5em;
+    }
+
+    .menu-icon {
+      font-size: 1.5em;
+      cursor: pointer;
+      margin-right: 20px;
+    }
+
+    .menu-icon div {
+      width: 25px;
+      height: 3px;
+      background-color: white;
+      margin: 5px 0;
+    }
+
+    .side-menu {
+      position: fixed;
+      top: 0;
+      left: -250px;
+      width: 250px;
+      height: 100vh;
+      background-color: #4A90E2;
+      transition: 0.3s;
+      z-index: 1001;
+      padding-top: 60px;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+    }
+
+    .side-menu.active {
+      left: 0;
+    }
+
+    .side-menu ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .side-menu li {
+      padding: 15px 25px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .side-menu a {
+      color: white;
+      text-decoration: none;
+      font-size: 1.1em;
+      display: block;
+      transition: 0.3s;
+    }
+
+    .side-menu a:hover {
+      padding-left: 10px;
+      color: #FFF8DC;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      display: none;
+      z-index: 1000;
+    }
+
+    .overlay.active {
+      display: block;
+    }
+
+    h1 {
+      text-align: center;
+      color: #4A90E2;
+      font-size: 2.5em;
+      margin-top: 80px;
+      margin-bottom: 20px;
+    }
+
+    /* Estilos para la sección de tecnologías */
+    .tech-container {
+      max-width: 800px;
+      margin: 40px auto;
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .tech-item {
+      margin: 15px 0;
+    }
+
+    .tech-title {
+      font-weight: bold;
+      color: #4A90E2;
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .tech-logo {
+      width: 30px;
+      height: 30px;
+    }
+
+    @media (max-width: 768px) {
+      .tech-container {
+        margin: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay"></div>
+  
+  <div class="side-menu">
+    <ul>
+      <li><a href="index.html">Página Principal</a></li>
+      <li><a href="sobre-nosotros.html">Sobre Nosotros</a></li>
+      <li><a href="Recursos-utilizados.html">Recursos utilizados</a></li>
+      <li><a href="#actividades">Actividades</a></li>
+      <li><a href="#admisiones">Admisiones</a></li>
+      <li><a href="#contacto">Contacto</a></li>
+    </ul>
+  </div>
+
+  <div class="navbar">
+    <div class="menu-icon">
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+    <h1>Scholary</h1>
+  </div>
+
+  <h1>Recursos que utilizamos</h1>
+
+  <div class="tech-container">
+    <div class="tech-item">
+      <div class="tech-title">
+        <svg class="tech-logo" viewBox="0 0 452 520">
+          <path fill="#e34f26" d="M41 460L0 0h451l-41 460-185 52"/>
+          <path fill="#ef652a" d="M226 472l149-41 35-394H226"/>
+          <path fill="#ecedee" d="M226 208h-75l-5-58h80V94H84l15 171h127zm0 147l-64-17-4-45h-56l7 89 117 32z"/>
+          <path fill="#fff" d="M226 265h69l-7 73-62 17v59l115-32 16-174H226zm0-171v56h136l5-56z"/>
+        </svg>
+        HTML (55%)
+      </div>
+      <p>Este lenguaje marca la estructura y el contenido de la página. Define elementos esenciales como la barra de navegación, los menús y la sección de visualización de imágenes, lo que permite que la información esté organizada y sea accesible para los usuarios.</p>
+    </div>
+    <div class="tech-item">
+      <div class="tech-title">
+        <svg class="tech-logo" viewBox="0 0 452 520">
+          <path fill="#0c73b8" d="M41 460L0 0h451l-41 460-185 52"/>
+          <path fill="#30a9dc" d="M226 472l149-41 35-394H226"/>
+          <path fill="#ecedee" d="M226 208h-75l-5-58h80V94H84l15 171h127zm0 147l-64-17-4-45h-56l7 89 117 32z"/>
+          <path fill="#fff" d="M226 265h69l-7 73-62 17v59l115-32 16-174H226zm0-171v56h136l5-56z"/>
+        </svg>
+        CSS (30%)
+      </div>
+      <p>CSS se utiliza para estilizar la página y mejorar la experiencia visual del usuario. Controla la apariencia de los elementos, desde la tipografía hasta el diseño de la navegación y las imágenes, asegurando que la página sea atractiva y fácil de usar.</p>
+    </div>
+    <div class="tech-item">
+      <div class="tech-title">
+        <svg class="tech-logo" viewBox="0 0 650 550">
+          <rect width="630" height="630" fill="#f7df1e"/>
+         <path d="m423.2 492.19c12.69 20.72 29.2 35.95 58.4 35.95 24.53 0 40.2-12.26 40.2-29.2 0-20.3-16.1-27.49-43.1-39.3l-14.8-6.35c-42.72-18.2-71.1-41-71.1-89.2 0-44.4 33.83-78.2 86.7-78.2 37.64 0 64.7 13.1 84.2 47.4l-46.1 29.6c-10.15-18.2-21.1-25.37-38.1-25.37-17.34 0-28.33 11-28.33 25.37 0 17.76 11 24.95 36.4 35.95l14.8 6.34c50.3 21.57 78.7 43.56 78.7 93 0 53.3-41.87 82.5-98.1 82.5-54.98 0-90.5-26.2-107.88-60.54zm-209.13 5.13c9.3 16.5 17.76 30.45 38.1 30.45 19.45 0 31.72-7.61 31.72-37.2v-201.3h59.2v202.1c0 61.3-35.94 89.2-88.4 89.2-47.4 0-74.85-24.53-88.81-54.075z"/>
+        </svg>
+        JavaScript (15%)
+      </div>
+      <p>Este lenguaje se encarga de la interactividad en la página. Permite funciones dinámicas como la búsqueda de imágenes y la gestión de eventos, como mostrar y ocultar menús, lo que enriquece la experiencia del usuario al interactuar con el sitio.</p>
+    </div>
+  </div>
+
+  <script>
+    const menuIcon = document.querySelector('.menu-icon');
+    const sideMenu = document.querySelector('.side-menu');
+    const overlay = document.querySelector('.overlay');
+
+    menuIcon.addEventListener('click', () => {
+      sideMenu.classList.toggle('active');
+      overlay.classList.toggle('active');
+    });
+
+    overlay.addEventListener('click', () => {
+      sideMenu.classList.remove('active');
+      overlay.classList.remove('active');
+    });
+  </script>
+</body>
+</html>
