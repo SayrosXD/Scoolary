@@ -253,7 +253,7 @@
 
     .download-link {
       display: inline-block;
-      margin-top: 10px;
+      margin-block: auto;
       padding: 10px 15px;
       background-color: #4A90E2;
       color: white;
@@ -315,7 +315,7 @@
   </div>
 
   <div class="search-menu">
-    <input type="text" id="searchQuery" placeholder="Buscar imágenes por palabra clave...">
+    <input type="text" id="searchQuery" placeholder="Buscar imágenes por palabra clave..."> 
     <select id="categorySelect">
       <option value="">Todas las categorías</option>
       <option value="ajedrez">Ajedrez</option>
@@ -326,6 +326,8 @@
       <option value="atletismo">Atletismo</option>
       <option value="yudo">yudo</option>
     </select>
+    <input type="date" id="startDate" placeholder="Fecha de inicio">
+    <input type="date" id="endDate" placeholder="Fecha de fin">
     <button id="searchButton">Buscar</button>
   </div>
 
@@ -422,12 +424,35 @@
         imageDisplay.appendChild(container);
       });
     }
-
-    function searchImages(query, category) {
+    function parseDate(dateStr) {
+      const months = {
+        'enero': 0, 'febrero': 1, 'marzo': 2, 'abril': 3, 'mayo': 4, 'junio': 5,
+        'julio': 6, 'agosto': 7, 'septiembre': 8, 'octubre': 9, 'noviembre': 10, 'diciembre': 11
+      };
+      
+      const parts = dateStr.toLowerCase().match(/(\d+)\s+de\s+([a-zá-ú]+),?\s+(\d{4})/);
+      if (parts) {
+        return new Date(parts[3], months[parts[2]], parts[1]);
+      }
+      return null;
+    }
+    function searchImages(query, category, startDate, endDate) {
       return images.filter(image => {
+        // Verificar categoría
         if (category && image.category !== category) return false;
+        
+        // Verificar fechas
+        if (startDate || endDate) {
+          const imageDate = parseDate(image.fecha);
+          if (!imageDate) return false;
+          
+          if (startDate && imageDate < startDate) return false;
+          if (endDate && imageDate > endDate) return false;
+        }
+        
+        // Verificar texto de búsqueda
         if (!query) return true;
-
+        
         query = query.toLowerCase();
         return image.title.toLowerCase().includes(query) ||
                image.descripcion.toLowerCase().includes(query) ||
@@ -456,8 +481,15 @@
     searchButton.addEventListener('click', function() {
       const query = document.getElementById('searchQuery').value.trim();
       const category = document.getElementById('categorySelect').value;
+      const startDate = document.getElementById('startDate').value ? new Date(document.getElementById('startDate').value) : null;
+      const endDate = document.getElementById('endDate').value ? new Date(document.getElementById('endDate').value) : null;
+      
+      // Si hay fecha fin, ajustarla al final del día
+      if (endDate) {
+        endDate.setHours(23, 59, 59, 999);
+      }
 
-      const results = searchImages(query, category);
+      const results = searchImages(query, category, startDate, endDate);
 
       if (results.length > 0) {
         displayImages(results);
@@ -467,7 +499,6 @@
 
       searchMenu.classList.remove('active');
     });
-
     // Funcionalidad del menú lateral
     const menuIcon = document.querySelector('.menu-icon');
     const sideMenu = document.querySelector('.side-menu');
