@@ -324,7 +324,8 @@
       <option value="basketball">Basketball</option>
       <option value="certamen">Certamen</option>
       <option value="atletismo">Atletismo</option>
-      <option value="yudo">yudo</option>
+      <option value="judo">Judo</option>
+      <option value="cultural">Cultural</option>
     </select>
     <input type="date" id="startDate" placeholder="Fecha de inicio">
     <input type="date" id="endDate" placeholder="Fecha de fin">
@@ -372,7 +373,7 @@
         category: 'taekwondo',
         tags: ['Taekwondo', 'Competencia', '15 de junio', '2024'],
         title: 'Seguimos cosechando exitos deportivos',
-        fecha: '15 de junio',
+        fecha: '15 de junio, 2024',
         descripcion: 'Por obtener medalla de plata a nivel nacional en el torneo de taekwondo felicitamos al estudiante',
         participantes: 'Angel Fabricio MaRtinez Sarantes',
         logros: 'Segundo lugar a nivel nacional en taekwondo'
@@ -387,16 +388,121 @@
         participantes: 'Jorge Josue Caceres',
         logros: 'Primer lugar en salto alto'
       },
-    ];
-
-    function displayImages(imagesToShow) {
-      const imageDisplay = document.getElementById('imageDisplay');
-      imageDisplay.innerHTML = '';
+      { 
+        file: 'Judo.jpg', 
+        category: 'judo',
+        tags: ['Judo', '21 de junio', '2024'],
+        title: 'Judo en los juegos escolares',
+        fecha: '21 de junio, 2024',
+        descripcion: 'En los juegos escolares se realizo la disciplina del judo,',
+        participantes: 'Marvin Jose Morales Almendarez',
+        logros: 'Obtener el tercer lugar en la etapa nacional'
+      },
+      { 
+        file: 'Baskquet.jpg', 
+        category: 'basketball',
+        tags: ['Basketball', '17 de mayo', '2024'],
+        title: 'Torneo de basketball',
+        fecha: '17 de mayo, 2024',
+        descripcion: 'Felicitamos a nuestros estudiantes por participar a nivel departamental',
+        participantes: 'Quinto año',
+        logros: 'Ser campeones a nivel departamental en el torneo de basket'
+      },
+      { 
+        file: 'Liga-del-conociento-vial.jpg', 
+        category: 'certamen',
+        tags: ['Conocimiento', '28 de agosto', '2024'],
+        title: 'Etapa nacional del conomiento vial',
+        fecha: '28 de agosto, 2024',
+        descripcion: 'Felicitaciones a los estudiantes de educacion secundaria',
+        participantes: 'Tercer año y cuarto año',
+        logros: 'Por su destacada participacion en la etapa nacional en la liga del conocimiento vial'
+      },
+      { 
+        file: 'certamen(3).jpg', 
+        category: 'certamen',
+        tags: ['certamen', '28 de agosto', '2024'],
+        title: 'Aprendiendo para crear. innovando para transformar (secundaria)',
+        fecha: '28 de agosto, 2024',
+        descripcion: 'Felicitaciones a nuestros estudiantes',
+        participantes: 'Valeria Naylea Perez Enriquez, Juan Francisco Muller Lopez',
+        logros: 'Ganadores del primer lugar a nivel departamental en el certamen "Mejor estudiante de secundaria'
+      },
+      { 
+        file: 'certamen(4).jpg', 
+        category: 'certamen',
+        tags: ['certamen', '22 de agosto', '2024'],
+        title: 'Aprendo y evoluciono con las matematicas',
+        fecha: '22 de agosto, 2024',
+        descripcion: 'Felicitamos a nuestro estudiante',
+        participantes: 'Luis Octavio Medina Sanchez',
+        logros: 'Por obtener el primer lugar a nivel departamental en el certamen'
+      },
+      { 
+        file: 'certamen(5).jpg', 
+        category: 'certamen',
+        tags: ['certamen', '21 de agosto', '2024'],
+        title: 'Certamen mejor docente de educacion secundaria 2024 etapa nacional',
+        fecha: '21 de agosto, 2024',
+        descripcion: 'Felicitamos a la mejor maestra de nuestra institucion',
+        participantes: 'Christian Massiel Amador',
+        logros: 'Obtener el tercer lugar a nivel nacional en el certamen "Mejor docente de educacion secundaria'
+      },
+      { 
+        file: 'futbol_masculino.jpg', 
+        category: 'futbol',
+        tags: ['futbol', '16 de junio', '2024'],
+        title: 'Ganadores nunca se rinden y los que se rinden no son ganadores',
+        fecha: '16 de junio, 2024',
+        descripcion: 'Felicitamos a nuestra seleccion masculina',
+        participantes: '(poca informacion)',
+        logros: 'Nos representaron a nivel nacional con destacada participacion'
+      },
+      { 
+        file: 'Ajedrez(2).jpg', 
+        category: 'ajedrez',
+        tags: ['Ajedrez', '6 de junio', '2024'],
+        title: 'Ajedrez juvenil, etapa nacional',
+        fecha: '6 de junio, 2024',
+        descripcion: 'Felicitamos a nuestros estudiantes',
+        participantes: 'Luis Heberto Suarez, Maveth Yoshua Lainez, Eduardo Jose Flores',
+        logros: 'por haber representado a nueva segovia y nuestro colegio en la etapa nacional'
+      },
+      { 
+        file: 'Cultural.jpg', 
+        category: 'cultural',
+        tags: ['Cultural', '9 de octubre', '2024'],
+        title: 'Nivel municipal de los festivales culturales',
+        fecha: '9 de octubre, 2024',
+        descripcion: 'Felicitamos al grupo "Los heraldos del camino"',
+        participantes: '(poca informacion)',
+        logros: 'Por obtener el primer lugar en la etapa municipal del festival cultural'
+      },
+     ];
       
-      imagesToShow.forEach(image => {
-        const container = document.createElement('div');
-        container.className = 'image-container';
-        
+  
+    function displayImages(filteredImages) {
+  const imageDisplay = document.getElementById('imageDisplay');
+  imageDisplay.innerHTML = '';
+  
+  // Ordenar las imágenes por fecha
+  const sortedImages = filteredImages.sort((a, b) => {
+    const dateA = parseDate(a.fecha);
+    const dateB = parseDate(b.fecha);
+    if (dateA && dateB) {
+      return dateB - dateA;
+    }
+    return 0;
+  });
+
+  if (sortedImages.length === 0) {
+    imageDisplay.innerHTML = '<p>No se encontraron imágenes que coincidan con tu búsqueda.</p>';
+    return;
+  }
+
+  sortedImages.forEach(image => {
+    const container = document.createElement('div');
+    container.className = 'image-container';         
         const imgElement = document.createElement('img');
         imgElement.src = image.file;
         imgElement.alt = image.title;
