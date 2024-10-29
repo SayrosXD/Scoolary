@@ -992,12 +992,16 @@ dateInput.addEventListener('change', (e) => {
 const searchInput = document.querySelector('.search-menu input[type="text"]');
 searchInput.addEventListener('input', (e) => {
     const searchText = e.target.value.toLowerCase();
+    const activeCategory = document.querySelector('.categories .active').textContent;
+
     const filteredNews = newsData
         .filter(news => 
-            news.title.toLowerCase().includes(searchText) ||
-            news.description.toLowerCase().includes(searchText)
+            (activeCategory === 'Todas las categorías' || news.category === activeCategory) &&
+            (news.title.toLowerCase().includes(searchText) ||
+            news.description.toLowerCase().includes(searchText))
         )
         .sort((a, b) => new Date(b.date) - new Date(a.date));
+
     const newsGrid = document.querySelector('.news-grid');
     newsGrid.innerHTML = filteredNews.map(createNewsCard).join('');
 });
