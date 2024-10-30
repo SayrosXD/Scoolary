@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 
 <html lang="es">
@@ -978,37 +979,42 @@ menuLinks.forEach(link => {
 
         
     
-       // Cargar el número actual de likes
-  async function getLikes() {
-    try {
-      const response = await fetch("like.js");
-      const data = await response.json();
-      document.getElementById("likeCount").innerText = `Likes: ${data.likes}`;
-    } catch (error) {
-      console.error("Error obteniendo likes:", error);
-    }
-  }
+        // Sistema de likes actualizado para usar Netlify Functions
+        async function getLikesFromNetlify(id) {
+            try {
+                const response = await fetch(`functions/like?id=${id}`);
+                const data = await response.json();
+                return data.likes;
+            } catch (error) {
+                console.error("Error obteniendo likes:", error);
+                return localStorage.getItem(`likes_${id}`) || 0;
+            }
+        }
 
-  // Función para añadir un like
-  async function addLike() {
-    try {
-      const response = await fetch("/.netlify/functions/like", { method: "POST" });
-      const data = await response.json();
-      document.getElementById("likeCount").innerText = `Likes: ${data.likes}`;
-    } catch (error) {
-      console.error("Error agregando like:", error);
-    }
-  }
+        async function updateLikesWithNetlify(id) {
+            try {
+                const response = await fetch(`/.netlify/functions/like`, {
+                    method: "POST",
+                    body: JSON.stringify({ id: id })
+                });
+                const data = await response.json();
+                localStorage.setItem(`liked_${id}`, 'true');
+                return data.likes;
+            } catch (error) {
+                console.error("Error actualizando likes:", error);
+                const currentLikes = parseInt(localStorage.getItem(`likes_${id}`)) || 0;
+                localStorage.setItem(`likes_${id}`, currentLikes + 1);
+                return currentLikes + 1;
+            }
+        }
 
-  document.getElementById("likeButton").addEventListener("click", addLike);
+        function hasLiked(id) {
+            return localStorage.getItem(`liked_${id}`) === 'true';
+        }
 
-  // Obtener likes al cargar la página
-  getLikes();
-
-
-        // Función para crear tarjetas de noticias con el botón "me gusta"
-        function createNewsCard(news) {
-            const likes = getLikes(news.id, news.likes); // Obtener los "likes" almacenados o iniciales
+        // Función actualizada para crear tarjetas de noticias
+        async function createNewsCard(news) {
+            const likes = await getLikesFromNetlify(news.id);
             const likedClass = hasLiked(news.id) ? 'disabled' : '';
             return `
                 <div class="news-card" data-category="${news.category}">
@@ -1024,11 +1030,14 @@ menuLinks.forEach(link => {
                 </div>
             `;
         }
-    
-    // Función para manejar el evento de "me gusta"
-        function handleLike(id) {
-            const newLikes = updateLikes(id);
-            document.getElementById(`like-count-${id}`).textContent = `Likes: ${newLikes}`;
+
+        // Función actualizada para manejar likes
+        async function handleLike(id) {
+            if (!hasLiked(id)) {
+                const newLikes = await updateLikesWithNetlify(id);
+                document.getElementById(`like-count-${id}`).textContent = `Likes: ${newLikes}`;
+                document.querySelector(`[onclick="handleLike(${id})"]`).classList.add('disabled');
+            }
         }
 
 // Función para filtrar y ordenar noticias por fecha
