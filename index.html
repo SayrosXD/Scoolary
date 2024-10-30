@@ -60,6 +60,23 @@
     background-color: rgba(0, 0, 0, 0.5); /* Fondo semitransparente */
     z-index: 99;
 }
+    
+    .like-button {
+            display: inline-block;
+            padding: 8px 15px;
+            background-color: var(--accent-color);
+            color: var(--white);
+            text-decoration: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+        .like-count {
+            font-size: 0.9rem;
+            color: var(--primary-color);
+            margin-top: 5px;
+        }
 
 
         .navbar {
@@ -267,6 +284,7 @@
 
         }
 
+    
 
 
         .slide {
@@ -742,6 +760,7 @@ menuLinks.forEach(link => {
 
             {
 
+                id: 1,
                 image: 'Ajedrez.jpg',
 
                 date: '2024-08-16',
@@ -750,12 +769,13 @@ menuLinks.forEach(link => {
 
                 description: 'Final del torneo de ajedrez en honor a nuestra señora de la asuncion. Participantes destacados: Maveth Yoshua y Angel Gabriel, obteniendo primer y segundo lugar respectivamente.',
 
-                category: 'Ajedrez'
-
+                category: 'Ajedrez',
+                likes: 12
             },
 
             {
 
+                id: 2,
                 image: 'Futbol_femenino.jpg',
 
                 date: '2024-08-08',
@@ -770,6 +790,7 @@ menuLinks.forEach(link => {
 
             {
 
+                id: 3,
                 image: 'Certamen.jpg',
 
                 date: '2024-08-29',
@@ -784,6 +805,7 @@ menuLinks.forEach(link => {
 
             {
 
+                id: 4,
                 image: 'Taekwondo.jpg',
 
                 date: '2024-06-15',
@@ -798,6 +820,7 @@ menuLinks.forEach(link => {
 
             {
 
+                id: 5,
                 image: 'Atletismo.jpg',
 
                 date: '2024-05-05',
@@ -812,6 +835,7 @@ menuLinks.forEach(link => {
 
             {
 
+                id: 6,
                 image: 'Judo.jpg',
 
                 date: '2024-06-21',
@@ -826,6 +850,7 @@ menuLinks.forEach(link => {
 
             {
 
+                id: 7,
                 image: 'Baskquet.jpg',
 
                 date: '2024-05-17',
@@ -840,6 +865,7 @@ menuLinks.forEach(link => {
 
             {
 
+                id: 8,
                 image: 'Liga-del-conociento-vial.jpg',
 
                 date: '2024-08-28',
@@ -854,6 +880,7 @@ menuLinks.forEach(link => {
 
             {
 
+                id: 9,
                 image: 'certamen(3).jpg',
 
                 date: '2024-08-28',
@@ -868,6 +895,7 @@ menuLinks.forEach(link => {
 
             {
 
+                id: 10,
                 image: 'certamen(4).jpg',
 
                 date: '2024-08-22',
@@ -882,6 +910,7 @@ menuLinks.forEach(link => {
 
             {
 
+                id: 11,
                 image: 'certamen(5).jpg',
 
                 date: '2024-08-21',
@@ -896,6 +925,7 @@ menuLinks.forEach(link => {
 
             {
 
+                id: 12,
                 image: 'futbol_masculino.jpg',
 
                 date: '2024-06-16',
@@ -910,6 +940,7 @@ menuLinks.forEach(link => {
 
             {
 
+                id: 13,
                 image: 'Ajedrez(2).jpg',
 
                 date: '2024-06-06',
@@ -924,6 +955,7 @@ menuLinks.forEach(link => {
 
             {
 
+                id: 14,
                 image: 'Cultural.jpg',
 
                 date: '2024-10-09',
@@ -946,20 +978,58 @@ menuLinks.forEach(link => {
 
         
     
-       // Función para crear tarjetas de noticias con un botón de descarga
-    function createNewsCard(news) {
-    return `
-        <div class="news-card" data-category="${news.category}">
-            <img class="news-image" src="${news.image}" alt="${news.title}">
-            <div class="news-content">
-                <div class="news-date">${news.date}</div>
-                <h3 class="news-title">${news.title}</h3>
-                <p class="news-description">${news.description}</p>
-                <a href="${news.image}" download="${news.title}" class="download-button">Descargar Imagen</a>
-            </div>
-        </div>
-    `;
-}
+       // Cargar el número actual de likes
+  async function getLikes() {
+    try {
+      const response = await fetch("like.js");
+      const data = await response.json();
+      document.getElementById("likeCount").innerText = `Likes: ${data.likes}`;
+    } catch (error) {
+      console.error("Error obteniendo likes:", error);
+    }
+  }
+
+  // Función para añadir un like
+  async function addLike() {
+    try {
+      const response = await fetch("/.netlify/functions/like", { method: "POST" });
+      const data = await response.json();
+      document.getElementById("likeCount").innerText = `Likes: ${data.likes}`;
+    } catch (error) {
+      console.error("Error agregando like:", error);
+    }
+  }
+
+  document.getElementById("likeButton").addEventListener("click", addLike);
+
+  // Obtener likes al cargar la página
+  getLikes();
+
+
+        // Función para crear tarjetas de noticias con el botón "me gusta"
+        function createNewsCard(news) {
+            const likes = getLikes(news.id, news.likes); // Obtener los "likes" almacenados o iniciales
+            const likedClass = hasLiked(news.id) ? 'disabled' : '';
+            return `
+                <div class="news-card" data-category="${news.category}">
+                    <img class="news-image" src="${news.image}" alt="${news.title}">
+                    <div class="news-content">
+                        <div class="news-date">${news.date}</div>
+                        <h3 class="news-title">${news.title}</h3>
+                        <p class="news-description">${news.description}</p>
+                        <a href="${news.image}" download="${news.title}" class="download-button">Descargar Imagen</a>
+                        <div class="like-button ${likedClass}" onclick="handleLike(${news.id})">Me gusta</div>
+                        <div class="like-count" id="like-count-${news.id}">Likes: ${likes}</div>
+                    </div>
+                </div>
+            `;
+        }
+    
+    // Función para manejar el evento de "me gusta"
+        function handleLike(id) {
+            const newLikes = updateLikes(id);
+            document.getElementById(`like-count-${id}`).textContent = `Likes: ${newLikes}`;
+        }
 
 // Función para filtrar y ordenar noticias por fecha
 function filterNews(category) {
