@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 
 <html lang="es">
@@ -1013,23 +1012,23 @@ menuLinks.forEach(link => {
         }
 
         // Función actualizada para crear tarjetas de noticias
-        async function createNewsCard(news) {
-            const likes = await getLikesFromNetlify(news.id);
-            const likedClass = hasLiked(news.id) ? 'disabled' : '';
-            return `
-                <div class="news-card" data-category="${news.category}">
-                    <img class="news-image" src="${news.image}" alt="${news.title}">
-                    <div class="news-content">
-                        <div class="news-date">${news.date}</div>
-                        <h3 class="news-title">${news.title}</h3>
-                        <p class="news-description">${news.description}</p>
-                        <a href="${news.image}" download="${news.title}" class="download-button">Descargar Imagen</a>
-                        <div class="like-button ${likedClass}" onclick="handleLike(${news.id})">Me gusta</div>
-                        <div class="like-count" id="like-count-${news.id}">Likes: ${likes}</div>
-                    </div>
-                </div>
-            `;
-        }
+        function createNewsCard(news) {
+    const likes = localStorage.getItem(`likes_${news.id}`) || 0;
+    const likedClass = hasLiked(news.id) ? 'disabled' : '';
+    return `
+        <div class="news-card" data-category="${news.category}">
+            <img class="news-image" src="${news.image}" alt="${news.title}">
+            <div class="news-content">
+                <div class="news-date">${news.date}</div>
+                <h3 class="news-title">${news.title}</h3>
+                <p class="news-description">${news.description}</p>
+                <a href="${news.image}" download="${news.title}" class="download-button">Descargar Imagen</a>
+                <div class="like-button ${likedClass}" onclick="handleLike(${news.id})">Me gusta</div>
+                <div class="like-count" id="like-count-${news.id}">Likes: ${likes}</div>
+            </div>
+        </div>
+    `;
+}
 
         // Función actualizada para manejar likes
         async function handleLike(id) {
