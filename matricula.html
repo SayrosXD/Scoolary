@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitud - Colegio Inmaculada Concepción</title>
+    <style>
+        /* Tus estilos se mantienen iguales */
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --light-bg: #f5f6fa;
+            --white: #ffffff;
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-bg);
+        }
+        .navbar {
+            background-color: var(--white);
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 10;
+        }
+        .menu-icon {
+            cursor: pointer;
+        }
+        .menu-icon div {
+            width: 25px;
+            height: 3px;
+            background-color: var(--primary-color);
+            margin: 5px 0;
+        }
+        .side-menu {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            height: 100%;
+            background-color: #333;
+            z-index: 100;
+        }
+        .side-menu a {
+            display: block;
+            color: var(--white);
+            padding: 15px;
+            text-decoration: none;
+        }
+        .side-menu a:hover {
+            background-color: var(--secondary-color);
+        }
+        .content {
+            margin-top: 80px;
+            padding: 20px;
+            text-align: center;
+        }
+        .form-container {
+            background-color: var(--white);
+            padding: 20px;
+            max-width: 600px;
+            margin: auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        .form-container input[type="text"],
+        .form-container input[type="number"],
+        .form-container input[type="tel"],
+        .form-container input[type="email"],
+        .form-container input[type="date"] {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            font-size: 1rem;
+        }
+        .form-container button {
+            background-color: var(--secondary-color);
+            color: var(--white);
+            border: none;
+            padding: 12px;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+        .form-container button:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="menu-icon" onclick="toggleMenu()">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        <h1></h1>
+    </div>
+
+    <div class="side-menu" id="sideMenu">
+        <a href="index.html">Página Principal</a>
+        <a href="sobre-nosotros.html">Sobre Nosotros</a>
+        <a href="recursos.html">Recursos</a>
+        <a href="anuncios.html">Anuncios</a>
+        <a href="matricula.html">Matricula escolar</a>
+    </div>
+
+    <div class="content">
+        <h2>Matricula automatizada</h2>
+        <div class="form-container">
+            <form id="requestForm">
+               <input type="text" name="nombre" placeholder="Nombre completo" required pattern="[A-Za-záéíóúÁÉÍÓÚñÑ]+( [A-Za-záéíóúÁÉÍÓÚñÑ]+)+" title="Ingresa al menos dos palabras (nombre completo)">
+                <input type="number" name="edad" placeholder="Edad" required min="3" max="25" title="Edad entre 3 y 25 años">
+                <input type="number" name="grado" placeholder="Grado a cursar (Numeracion por grado)" required min="1" max="12" title="Grado entre 1 y 12">
+                <input type="text" name="direccion" placeholder="Dirección de residencia" required>
+                <input type="text" name="tutor_nombre" placeholder="Nombre del tutor" required pattern="[A-Za-záéíóúÁÉÍÓÚñÑ ]+( [A-Za-záéíóúÁÉÍÓÚñÑ]+)+" title="Ingresa al menos dos palabras (nombre completo)">
+                <input type="tel" name="telefono_tutor" placeholder="Teléfono del tutor" required pattern="[0-9]{8}" title="Número de 8 dígitos (se incluye el +505 automaticamente)">
+                <input type="email" name="correo" placeholder="Correo electrónico" required>
+                <button type="submit" id="button">Enviar</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script>
+        emailjs.init('aYQj8l4hubsf4dk3f');
+
+        function toggleMenu() {
+            const sideMenu = document.getElementById('sideMenu');
+            sideMenu.style.transform = sideMenu.style.transform === 'translateX(0px)' ? 'translateX(-100%)' : 'translateX(0)';
+        }
+
+        const btn = document.getElementById('button');
+
+        document.getElementById('requestForm')
+            .addEventListener('submit', function(event) {
+                event.preventDefault();
+                
+                // Validar el formulario antes de enviar
+                if (!this.checkValidity()) {
+                    alert('Por favor, llena el formulario correctamente.');
+                    return;
+                }
+
+                btn.textContent = 'Enviando...';
+
+                const serviceID = 'default_service';
+                const templateID = 'template_um7o5c8';
+
+                emailjs.sendForm(serviceID, templateID, this)
+                    .then(() => {
+                        btn.textContent = 'Enviar';
+                        alert('Enviado!');
+                    }, (err) => {
+                        btn.textContent = 'Enviar';
+                        alert(JSON.stringify(err));
+                    });
+            });
+    </script>
+</body>
+</html>
