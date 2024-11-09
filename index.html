@@ -755,237 +755,13 @@ menuLinks.forEach(link => {
 
         
 
-        // Datos actualizados de noticias
+        // Archivo principal de JavaScript (main.js)
 
-        const newsData = [
-
-            {
-
-                id: 1,
-                image: 'Ajedrez.jpg',
-
-                date: '2024-08-16',
-
-                title: 'Torneo de Ajedrez 2024',
-
-                description: 'Final del torneo de ajedrez en honor a nuestra señora de la asuncion. Participantes destacados: Maveth Yoshua y Angel Gabriel, obteniendo primer y segundo lugar respectivamente.',
-
-                category: 'Ajedrez'
-              
-            },
-
-            {
-
-                id: 2,
-                image: 'Futbol_femenino.jpg',
-
-                date: '2024-08-08',
-
-                title: 'Campeonato de futbol femenino',
-
-                description: 'Felicitamos al equipo Sub-Campeón de la liga de fútbol-sala femenino. El equipo de Séptimo grado "C" logró ganar el partido con mucho esfuerzo y dedicación.',
-
-                category: 'Fútbol'
-
-            },
-
-            {
-
-                id: 3,
-                image: 'Certamen.jpg',
-
-                date: '2024-08-29',
-
-                title: 'Aprendiendo para crear, innovando para transformar',
-
-                description: 'Ganadores del primer lugar a nivel departamental en el Certamen del Mejor Estudiante de Educación Primaria. Felicitaciones a Wesley Jareth iglesias y Cristina Nazareth Montalvan Gradiz.',
-
-                category: 'Certamen'
-
-            },
-
-            {
-
-                id: 4,
-                image: 'Taekwondo.jpg',
-
-                date: '2024-06-15',
-
-                title: 'Seguimos cosechando exitos deportivos',
-
-                description: 'Por obtener medalla de plata a nivel nacional en el torneo de taekwondo felicitamos al estudiante Angel Fabricio Martinez Sarantes.',
-
-                category: 'Taekwondo'
-
-            },
-
-            {
-
-                id: 5,
-                image: 'Atletismo.jpg',
-
-                date: '2024-05-05',
-
-                title: 'Felicitamos a nuestro estudiante',
-
-                description: 'Por obtener el primer lugar a nivel departamental en salto alto. Felicitaciones a Jorge Josue Caceres.',
-
-                category: 'Atletismo'
-
-            },
-
-            {
-
-                id: 6,
-                image: 'Judo.jpg',
-
-                date: '2024-06-21',
-
-                title: 'Judo en los juegos escolares',
-
-                description: 'En los juegos escolares se realizó la disciplina del judo. Marvin Jose Morales Almendarez obtuvo el tercer lugar en la etapa nacional.',
-
-                category: 'Taekwondo'
-
-            },
-
-            {
-
-                id: 7,
-                image: 'Baskquet.jpg',
-
-                date: '2024-05-17',
-
-                title: 'Torneo de basketball',
-
-                description: 'Felicitamos a los estudiantes de Quinto año por ser campeones a nivel departamental en el torneo de basket.',
-
-                category: 'Basketball'
-
-            },
-
-            {
-
-                id: 8,
-                image: 'Liga-del-conociento-vial.jpg',
-
-                date: '2024-08-28',
-
-                title: 'Etapa nacional del conocimiento vial',
-
-                description: 'Felicitaciones a los estudiantes de tercer año y cuarto año por su destacada participación en la etapa nacional en la liga del conocimiento vial.',
-
-                category: 'Certamen'
-
-            },
-
-            {
-
-                id: 9,
-                image: 'certamen(3).jpg',
-
-                date: '2024-08-28',
-
-                title: 'Aprendiendo para crear, innovando para transformar (secundaria)',
-
-                description: 'Felicitaciones a Valeria Naylea Perez Enriquez y Juan Francisco Muller Lopez, ganadores del primer lugar a nivel departamental en el certamen "Mejor estudiante de secundaria".',
-
-                category: 'Certamen'
-
-            },
-
-            {
-
-                id: 10,
-                image: 'certamen(4).jpg',
-
-                date: '2024-08-22',
-
-                title: 'Aprendo y evoluciono con las matematicas',
-
-                description: 'Felicitamos a Luis Octavio Medina Sanchez por obtener el primer lugar a nivel departamental en el certamen.',
-
-                category: 'Certamen'
-
-            },
-
-            {
-
-                id: 11,
-                image: 'certamen(5).jpg',
-
-                date: '2024-08-21',
-
-                title: 'Certamen mejor docente de educacion secundaria 2024',
-
-                description: 'Felicitamos a Christian Massiel Amador por obtener el tercer lugar a nivel nacional en el certamen "Mejor docente de educación secundaria".',
-
-                category: 'Certamen'
-
-            },
-
-            {
-
-                id: 12,
-                image: 'futbol_masculino.jpg',
-
-                date: '2024-06-16',
-
-                title: 'Ganadores nunca se rinden',
-
-                description: 'Felicitamos a nuestra selección masculina por representarnos a nivel nacional con destacada participación.',
-
-                category: 'Fútbol'
-
-            },
-
-            {
-
-                id: 13,
-                image: 'Ajedrez(2).jpg',
-
-                date: '2024-06-06',
-
-                title: 'Ajedrez juvenil, etapa nacional',
-
-                description: 'Felicitamos a Luis Heberto Suarez, Maveth Yoshua Lainez y Eduardo Jose Flores por haber representado a nueva segovia y nuestro colegio en la etapa nacional.',
-
-                category: 'Ajedrez'
-
-            },
-
-            {
-
-                id: 14,
-                image: 'Cultural.jpg',
-
-                date: '2024-10-09',
-
-                title: 'Nivel municipal de los festivales culturales',
-
-                description: 'Felicitamos al grupo "Los heraldos del camino" por obtener el primer lugar en la etapa municipal del festival cultural.',
-
-                category: 'Cultural'
-
-            }
-
-        ];
-
-
-
-    
-
-
-
-        
-    
-      // Reemplaza todo el código relacionado con likes por este nuevo sistema
-    <script type="module">
-    
-// Configuración de Firebase
+// Importaciones de Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
+// Configuración de Firebase
 const firebaseConfig = {
     apiKey: "AIzaSyCk_tGfeKTillU4GwJ3fLOl-v_MzLTHizs",
     authDomain: "scholary-5bd45.firebaseapp.com",
@@ -996,10 +772,24 @@ const firebaseConfig = {
     measurementId: "G-7DFCBBNB7E"
 };
 
+// Inicializar Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Función para obtener likes de Firebase
+// Datos de noticias
+const newsData = [ 
+    { 
+        id: 1,
+        image: 'Ajedrez.jpg', 
+        date: '2024-08-16', 
+        title: 'Torneo de Ajedrez 2024', 
+        description: 'Final del torneo de ajedrez en honor a nuestra señora de la asuncion. Participantes destacados: Maveth Yoshua y Angel Gabriel, obteniendo primer y segundo lugar respectivamente.', 
+        category: 'Ajedrez'
+    },
+    // ... resto de tus noticias ...
+]; 
+
+// Funciones de manejo de likes
 async function getLikes(newsId) {
     try {
         const docRef = doc(db, "likes", `news_${newsId}`);
@@ -1008,7 +798,6 @@ async function getLikes(newsId) {
         if (docSnap.exists()) {
             return docSnap.data().count;
         } else {
-            // Si el documento no existe, lo creamos con 0 likes
             await setDoc(docRef, { count: 0 });
             return 0;
         }
@@ -1018,7 +807,6 @@ async function getLikes(newsId) {
     }
 }
 
-// Función para actualizar likes en Firebase
 async function updateLikes(newsId) {
     try {
         const docRef = doc(db, "likes", `news_${newsId}`);
@@ -1031,7 +819,6 @@ async function updateLikes(newsId) {
             });
             return currentLikes + 1;
         } else {
-            // Si el documento no existe, lo creamos con 1 like
             await setDoc(docRef, { count: 1 });
             return 1;
         }
@@ -1039,6 +826,10 @@ async function updateLikes(newsId) {
         console.error("Error al actualizar likes:", error);
         return null;
     }
+}
+
+function hasLiked(newsId) {
+    return localStorage.getItem(`liked_${newsId}`) === 'true';
 }
 
 // Función para crear tarjetas de noticias
@@ -1054,7 +845,7 @@ async function createNewsCard(news) {
                 <h3 class="news-title">${news.title}</h3>
                 <p class="news-description">${news.description}</p>
                 <a href="${news.image}" download="${news.title}" class="download-button">Descargar Imagen</a>
-                <button class="like-button ${likedClass}" onclick="handleLike(${news.id})">
+                <button class="like-button ${likedClass}" onclick="window.handleLikeClick(${news.id})">
                     Me gusta
                 </button>
                 <div class="like-count" id="like-count-${news.id}">
@@ -1065,38 +856,7 @@ async function createNewsCard(news) {
     `;
 }
 
-// Función para manejar el evento de dar like
-async function handleLike(newsId) {
-    if (!hasLiked(newsId)) {
-        const newLikes = await updateLikes(newsId);
-        if (newLikes !== null) {
-            document.getElementById(`like-count-${newsId}`).textContent = `${newLikes} Me gusta`;
-            localStorage.setItem(`liked_${newsId}`, 'true');
-            const likeButton = document.querySelector(`[onclick="handleLike(${newsId})"]`);
-            if (likeButton) {
-                likeButton.classList.add('disabled');
-            }
-        }
-    }
-}
-
-// Función para verificar si ya se dio like
-function hasLiked(newsId) {
-    return localStorage.getItem(`liked_${newsId}`) === 'true';
-}
-
-// Función para renderizar todas las noticias
-async function renderNews() {
-    const newsGrid = document.querySelector('.news-grid');
-    newsGrid.innerHTML = ''; // Limpia el contenedor
-    
-    for (const news of newsData) {
-        const newsCardHTML = await createNewsCard(news);
-        newsGrid.innerHTML += newsCardHTML;
-    }
-}
-
-// Modificación de la función filterNews para trabajar con async/await
+// Funciones de filtrado y búsqueda
 async function filterNews(category) {
     const newsGrid = document.querySelector('.news-grid');
     const filteredNews = category === 'Todas las categorías'
@@ -1105,74 +865,133 @@ async function filterNews(category) {
     
     filteredNews.sort((a, b) => new Date(b.date) - new Date(a.date));
     
-    newsGrid.innerHTML = ''; // Limpia el contenedor
+    newsGrid.innerHTML = '';
     for (const news of filteredNews) {
         const newsCardHTML = await createNewsCard(news);
         newsGrid.innerHTML += newsCardHTML;
     }
 }
 
-// Inicializar las noticias
-window.onload = () => {
+// Inicialización y manejo de eventos
+function initializeApp() {
+    // Manejo del menú lateral
+    const menuIcon = document.querySelector('.menu-icon');
+    const sideMenu = document.querySelector('.side-menu');
+    const overlay = document.querySelector('.overlay');
+    const menuLinks = document.querySelectorAll('.side-menu a');
+
+    function toggleMenu() {
+        const isOpen = sideMenu.style.transform === 'translateX(0px)';
+        sideMenu.style.transform = isOpen ? 'translateX(-100%)' : 'translateX(0)';
+        overlay.style.display = isOpen ? 'none' : 'block';
+    }
+
+    menuIcon.addEventListener('click', toggleMenu);
+    overlay.addEventListener('click', toggleMenu);
+    menuLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            sideMenu.style.transform = 'translateX(-100%)';
+            overlay.style.display = 'none';
+        });
+    });
+
+    // Manejo del slider
+    const sliderContainer = document.querySelector('.slider-container');
+    const slides = document.querySelectorAll('.slide');
+    const dots = document.querySelectorAll('.slider-dot');
+    let currentSlide = 0;
+
+    function updateSlider() {
+        sliderContainer.style.transform = `translateX(-${currentSlide * 100}%)`; 
+        dots.forEach((dot, index) => { 
+            dot.classList.toggle('active', index === currentSlide); 
+        }); 
+    }
+
+    dots.forEach((dot, index) => {
+        dot.addEventListener('click', () => {
+            currentSlide = index;
+            updateSlider();
+        });
+    });
+
+    setInterval(() => {
+        currentSlide = (currentSlide + 1) % slides.length;
+        updateSlider();
+    }, 5000);
+
+    // Manejo de categorías
+    const categories = document.querySelectorAll('.categories span');
+    categories.forEach(category => {
+        category.addEventListener('click', () => {
+            categories.forEach(c => c.classList.remove('active'));
+            category.classList.add('active');
+            filterNews(category.textContent);
+        });
+    });
+
+    // Inicializar noticias
     filterNews('Todas las categorías');
-};
 
-// Hacer las funciones disponibles globalmente
-window.handleLike = handleLike;
-window.filterNews = filterNews;
-        // Generar el contenido de las noticias
-        async function renderNews() {
-            const newsGrid = document.querySelector('.news-grid');
-            for (const news of newsData) {
-                const newsCardHTML = await createNewsCard(news);
-                newsGrid.innerHTML += newsCardHTML;
-            }
+    // Búsqueda por fecha
+    const dateInput = document.querySelector('#search-date');
+    dateInput.addEventListener('change', async (e) => {
+        const selectedDate = e.target.value;
+        const filteredNews = newsData
+            .filter(news => news.date === selectedDate)
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+        const newsGrid = document.querySelector('.news-grid');
+        newsGrid.innerHTML = '';
+        for (const news of filteredNews) {
+            const newsCardHTML = await createNewsCard(news);
+            newsGrid.innerHTML += newsCardHTML;
         }
+    });
 
-// Función para filtrar y ordenar noticias por fecha
-function filterNews(category) {
-    const newsGrid = document.querySelector('.news-grid');
-    const filteredNews = category === 'Todas las categorías'
-        ? newsData
-        : newsData.filter(news => news.category === category);
-    
-    // Ordenar por fecha descendente
-    filteredNews.sort((a, b) => new Date(b.date) - new Date(a.date));
-    
-    newsGrid.innerHTML = filteredNews.map(createNewsCard).join('');
+    // Búsqueda por texto
+    const searchInput = document.querySelector('.search-menu input[type="text"]');
+    searchInput.addEventListener('input', async (e) => {
+        const searchText = e.target.value.toLowerCase();
+        const activeCategory = document.querySelector('.categories .active').textContent;
+
+        const filteredNews = newsData
+            .filter(news => 
+                (activeCategory === 'Todas las categorías' || news.category === activeCategory) &&
+                (news.title.toLowerCase().includes(searchText) ||
+                news.description.toLowerCase().includes(searchText))
+            )
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        const newsGrid = document.querySelector('.news-grid');
+        newsGrid.innerHTML = '';
+        for (const news of filteredNews) {
+            const newsCardHTML = await createNewsCard(news);
+            newsGrid.innerHTML += newsCardHTML;
+        }
+    });
 }
 
-// Inicializar las noticias en la carga de la página
-filterNews('Todas las categorías');
+// Función global para manejar clicks en likes
+async function handleLikeClick(newsId) {
+    if (!hasLiked(newsId)) {
+        const newLikes = await updateLikes(newsId);
+        if (newLikes !== null) {
+            document.getElementById(`like-count-${newsId}`).textContent = `${newLikes} Me gusta`;
+            localStorage.setItem(`liked_${newsId}`, 'true');
+            const likeButton = document.querySelector(`[onclick="window.handleLikeClick(${newsId})"]`);
+            if (likeButton) {
+                likeButton.classList.add('disabled');
+            }
+        }
+    }
+}
 
-// Búsqueda por fecha
-const dateInput = document.querySelector('#search-date');
-dateInput.addEventListener('change', (e) => {
-    const selectedDate = e.target.value;
-    const filteredNews = newsData
-        .filter(news => news.date === selectedDate)
-        .sort((a, b) => new Date(b.date) - new Date(a.date));
-    const newsGrid = document.querySelector('.news-grid');
-    newsGrid.innerHTML = filteredNews.map(createNewsCard).join('');
-});
+// Hacer funciones disponibles globalmente
+window.handleLikeClick = handleLikeClick;
+window.filterNews = filterNews;
 
-// Búsqueda por texto
-const searchInput = document.querySelector('.search-menu input[type="text"]');
-searchInput.addEventListener('input', (e) => {
-    const searchText = e.target.value.toLowerCase();
-    const activeCategory = document.querySelector('.categories .active').textContent;
-
-    const filteredNews = newsData
-        .filter(news => 
-            (activeCategory === 'Todas las categorías' || news.category === activeCategory) &&
-            (news.title.toLowerCase().includes(searchText) ||
-            news.description.toLowerCase().includes(searchText))
-        )
-        .sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    const newsGrid = document.querySelector('.news-grid');
-    newsGrid.innerHTML = filteredNews.map(createNewsCard).join('');
-});
+// Inicializar la aplicación cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', initializeApp);
     </script>
 
 </script>
