@@ -61,34 +61,17 @@
     z-index: 99;
 }
     
-    .heart-button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 8px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.heart-icon {
-    width: 24px;
-    height: 24px;
-    transition: all 0.3s ease;
-    stroke: #666;
-    stroke-width: 2;
-    fill: none;
-}
-
-.heart-icon.liked {
-    fill: #e74c3c;
-    stroke: #e74c3c;
-}
-
-.likes-count {
-    color: #666;
-    font-size: 0.9rem;
-}
+    .like-button {
+            display: inline-block;
+            padding: 8px 15px;
+            background-color: var(--accent-color);
+            color: var(--white);
+            text-decoration: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
         .like-count {
             font-size: 0.9rem;
             color: var(--primary-color);
@@ -1031,8 +1014,7 @@ menuLinks.forEach(link => {
         // Función actualizada para crear tarjetas de noticias
         function createNewsCard(news) {
     const likes = localStorage.getItem(`likes_${news.id}`) || 0;
-    const isLiked = localStorage.getItem(`liked_${news.id}`) === 'true';
-    
+    const likedClass = hasLiked(news.id) ? 'disabled' : '';
     return `
         <div class="news-card" data-category="${news.category}">
             <img class="news-image" src="${news.image}" alt="${news.title}">
@@ -1041,45 +1023,21 @@ menuLinks.forEach(link => {
                 <h3 class="news-title">${news.title}</h3>
                 <p class="news-description">${news.description}</p>
                 <a href="${news.image}" download="${news.title}" class="download-button">Descargar Imagen</a>
-                <button class="heart-button" onclick="handleLike(${news.id})">
-                    <svg class="heart-icon ${isLiked ? 'liked' : ''}" viewBox="0 0 24 24">
-                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                    </svg>
-                    <span class="likes-count" id="like-count-${news.id}">${likes}</span>
-                </button>
+                <div class="like-button ${likedClass}" onclick="handleLike(${news.id})">Me gusta</div>
+                <div class="like-count" id="like-count-${news.id}">Likes: ${likes}</div>
             </div>
         </div>
     `;
 }
-}
 
+        // Función actualizada para manejar likes
         async function handleLike(id) {
-    const heartIcon = document.querySelector(`[onclick="handleLike(${id})"] .heart-icon`);
-    const likesCountElement = document.getElementById(`like-count-${id}`);
-    const isLiked = localStorage.getItem(`liked_${id}`) === 'true';
-
-    if (!isLiked) {
-        heartIcon.classList.add('liked');
-        const currentLikes = parseInt(likesCountElement.textContent) || 0;
-        const newLikes = currentLikes + 1;
-        localStorage.setItem(`likes_${id}`, newLikes);
-        localStorage.setItem(`liked_${id}`, 'true');
-        likesCountElement.textContent = newLikes;
-
-        try {
-            await updateLikesWithNetlify(id);
-        } catch (error) {
-            console.error("Error updating likes:", error);
+            if (!hasLiked(id)) {
+                const newLikes = await updateLikesWithNetlify(id);
+                document.getElementById(`like-count-${id}`).textContent = `Likes: ${newLikes}`;
+                document.querySelector(`[onclick="handleLike(${id})"]`).classList.add('disabled');
+            }
         }
-    } else {
-        heartIcon.classList.remove('liked');
-        const currentLikes = parseInt(likesCountElement.textContent) || 0;
-        const newLikes = Math.max(0, currentLikes - 1);
-        localStorage.setItem(`likes_${id}`, newLikes);
-        localStorage.setItem(`liked_${id}`, 'false');
-        likesCountElement.textContent = newLikes;
-    }
-}
 
 // Función para filtrar y ordenar noticias por fecha
 function filterNews(category) {
