@@ -770,8 +770,8 @@ menuLinks.forEach(link => {
 
                 description: 'Final del torneo de ajedrez en honor a nuestra señora de la asuncion. Participantes destacados: Maveth Yoshua y Angel Gabriel, obteniendo primer y segundo lugar respectivamente.',
 
-                category: 'Ajedrez',
-                likes: 12
+                category: 'Ajedrez'
+              
             },
 
             {
@@ -979,10 +979,10 @@ menuLinks.forEach(link => {
 
         
     
-        // Sistema de likes actualizado para usar Netlify Functions
+       // Configuración de Netlify Functions para likes
         async function getLikesFromNetlify(id) {
             try {
-                const response = await fetch(`functions/like?id=${id}`);
+                const response = await fetch(`./functions/like?id=${id}`);
                 const data = await response.json();
                 return data.likes;
             } catch (error) {
@@ -1012,31 +1012,39 @@ menuLinks.forEach(link => {
             return localStorage.getItem(`liked_${id}`) === 'true';
         }
 
-        // Función actualizada para crear tarjetas de noticias
-        function createNewsCard(news) {
-    const likes = localStorage.getItem(`likes_${news.id}`) || 0;
-    const likedClass = hasLiked(news.id) ? 'disabled' : '';
-    return `
-        <div class="news-card" data-category="${news.category}">
-            <img class="news-image" src="${news.image}" alt="${news.title}">
-            <div class="news-content">
-                <div class="news-date">${news.date}</div>
-                <h3 class="news-title">${news.title}</h3>
-                <p class="news-description">${news.description}</p>
-                <a href="${news.image}" download="${news.title}" class="download-button">Descargar Imagen</a>
-                <div class="like-button ${likedClass}" onclick="handleLike(${news.id})">Me gusta</div>
-                <div class="like-count" id="like-count-${news.id}">Likes: ${likes}</div>
-            </div>
-        </div>
-    `;
-}
+        // Función para crear tarjetas de noticias
+        async function createNewsCard(news) {
+            const likes = await getLikesFromNetlify(news.id);
+            const likedClass = hasLiked(news.id) ? 'disabled' : '';
+            return `
+                <div class="news-card" data-category="${news.category}">
+                    <img class="news-image" src="${news.image}" alt="${news.title}">
+                    <div class="news-content">
+                        <div class="news-date">${news.date}</div>
+                        <h3 class="news-title">${news.title}</h3>
+                        <p class="news-description">${news.description}</p>
+                        <a href="${news.image}" download="${news.title}" class="download-button">Descargar Imagen</a>
+                        <div class="like-button ${likedClass}" onclick="handleLike(${news.id})">Me gusta</div>
+                        <div class="like-count" id="like-count-${news.id}">${likes} Me gusta</div>
+                    </div>
+                </div>
+            `;
+        }
 
-        // Función actualizada para manejar likes
+        // Función para manejar el evento de dar like
         async function handleLike(id) {
             if (!hasLiked(id)) {
                 const newLikes = await updateLikesWithNetlify(id);
-                document.getElementById(`like-count-${id}`).textContent = `Likes: ${newLikes}`;
-                document.querySelector(`[onclick="handleLike(${id})"]`).classList.add('disabled');
+                document.getElementById(`like-count-${id}`).innerText = `${newLikes} Me gusta`;
+            }
+        }
+
+        // Generar el contenido de las noticias
+        async function renderNews() {
+            const newsGrid = document.querySelector('.news-grid');
+            for (const news of newsData) {
+                const newsCardHTML = await createNewsCard(news);
+                newsGrid.innerHTML += newsCardHTML;
             }
         }
 
