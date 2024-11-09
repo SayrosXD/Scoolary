@@ -1,62 +1,53 @@
+// Importa las funciones necesarias para inicializar Firebase y usar Firestore
+import { initializeApp } from "firebase/app";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, increment } from "firebase/firestore";
 
-// Importa módulos necesarios
-const fs = require("fs").promises;
-const path = require("path");
+// Configuración de Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyCk_tGfeKTillU4GwJ3fLOl-v_MzLTHizs",
+  authDomain: "scholary-5bd45.firebaseapp.com",
+  projectId: "scholary-5bd45",
+  storageBucket: "scholary-5bd45.appspot.com",
+  messagingSenderId: "565098748615",
+  appId: "1:565098748615:web:5b9f679f0442ebbb657ce2",
+  measurementId: "G-7DFCBBNB7E" // Este campo se puede omitir si no usas Analytics
+};
 
-const filePath = path.join(__dirname, "likes.json");
+// Inicializa Firebase y Firestore
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app); // Esto permite interactuar con Firestore
 
-// Inicializa el archivo de likes si no existe
-async function initializeLikesFile() {
-  try {
-    await fs.access(filePath);
-  } catch {
-    await fs.writeFile(filePath, JSON.stringify({ likes: 0 }));
-  }
+// Funciones para gestionar los "likes" (como en el código anterior)
+async function getLikesFromFirestore(id) {
+    const docRef = doc(db, "likes", id.toString());
+    const docSnap = await getDoc(docRef);
+    return docSnap.exists() ? docSnap.data().count : 0;
 }
 
-// Handler de la función
-exports.handler = async (event) => {
-  await initializeLikesFile();
-  
-  if (event.httpMethod === "POST") {
-    // Incrementa el contador de "likes"
-    try {
-      const data = await fs.readFile(filePath, "utf-8");
-      const likesData = JSON.parse(data);
-      likesData.likes += 1;
-      
-      await fs.writeFile(filePath, JSON.stringify(likesData));
-      
-      return {
-        statusCode: 200,
-        body: JSON.stringify(likesData),
-      };
-    } catch (error) {
-      return {
-        statusCode: 500,
-        body: JSON.stringify({ error: "Error incrementando likes" }),
-      };
-    }
-  } else if (event.httpMethod === "GET") {
-    // Retorna el número actual de "likes"
-    try {
-      const data = await fs.readFile(filePath, "utf-8");
-      const likesData = JSON.parse(data);
-      
-      return {
-        statusCode: 200,
-        body: JSON.stringify(likesData),
-      };
-    } catch (error) {
-      return {
-        statusCode: 500,
-        body: JSON.stringify({ error: "Error obteniendo likes" }),
-      };
-    }
-  }
+async function updateLikesInFirestore(id) {
+    const docRef = doc(db, "likes", id.toString());
+    const docSnap = await getDoc(docRef);
 
-  return {
-    statusCode: 405,
-    body: "Método no permitido",
-  };
-};
+    if (docSnap.exists()) {
+        await updateDoc(docRef, { count: increment(1) });
+    } else {
+        await setDoc(docRef, { count: 1 });
+    }
+
+    localStorage.setItem(`liked_${id}`, 'true');
+    return getLikesFromFirestore(id);
+}
+
+function hasLiked(id) {
+    return localStorage.getItem(`liked_${id}`) === 'true';
+}
+
+async function handleLike(id) {
+    if (hasLiked(id)) {
+        alert("Ya has dado like a esta noticia.");
+        return;
+    }
+
+    const newCount = await updateLikesInFirestore(id);
+    document.getElementById(`like-count-${id}`).innerText = `Likes: ${newCount}`;
+}
