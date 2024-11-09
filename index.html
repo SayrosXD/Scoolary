@@ -979,66 +979,147 @@ menuLinks.forEach(link => {
 
         
     
-       // Configuración de Netlify Functions para likes
-        async function getLikesFromNetlify(id) {
-            try {
-                const response = await fetch(`./functions/like?id=${id}`);
-                const data = await response.json();
-                return data.likes;
-            } catch (error) {
-                console.error("Error obteniendo likes:", error);
-                return localStorage.getItem(`likes_${id}`) || 0;
-            }
-        }
+      // Reemplaza todo el código relacionado con likes por este nuevo sistema
+    <script type="module">
+    
+// Configuración de Firebase
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-        async function updateLikesWithNetlify(id) {
-            try {
-                const response = await fetch(`/.netlify/functions/like`, {
-                    method: "POST",
-                    body: JSON.stringify({ id: id })
-                });
-                const data = await response.json();
-                localStorage.setItem(`liked_${id}`, 'true');
-                return data.likes;
-            } catch (error) {
-                console.error("Error actualizando likes:", error);
-                const currentLikes = parseInt(localStorage.getItem(`likes_${id}`)) || 0;
-                localStorage.setItem(`likes_${id}`, currentLikes + 1);
-                return currentLikes + 1;
-            }
-        }
+const firebaseConfig = {
+    apiKey: "AIzaSyCk_tGfeKTillU4GwJ3fLOl-v_MzLTHizs",
+    authDomain: "scholary-5bd45.firebaseapp.com",
+    projectId: "scholary-5bd45",
+    storageBucket: "scholary-5bd45.firebasestorage.app",
+    messagingSenderId: "565098748615",
+    appId: "1:565098748615:web:5b9f679f0442ebbb657ce2",
+    measurementId: "G-7DFCBBNB7E"
+};
 
-        function hasLiked(id) {
-            return localStorage.getItem(`liked_${id}`) === 'true';
-        }
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-        // Función para crear tarjetas de noticias
-        async function createNewsCard(news) {
-            const likes = await getLikesFromNetlify(news.id);
-            const likedClass = hasLiked(news.id) ? 'disabled' : '';
-            return `
-                <div class="news-card" data-category="${news.category}">
-                    <img class="news-image" src="${news.image}" alt="${news.title}">
-                    <div class="news-content">
-                        <div class="news-date">${news.date}</div>
-                        <h3 class="news-title">${news.title}</h3>
-                        <p class="news-description">${news.description}</p>
-                        <a href="${news.image}" download="${news.title}" class="download-button">Descargar Imagen</a>
-                        <div class="like-button ${likedClass}" onclick="handleLike(${news.id})">Me gusta</div>
-                        <div class="like-count" id="like-count-${news.id}">${likes} Me gusta</div>
-                    </div>
+// Función para obtener likes de Firebase
+async function getLikes(newsId) {
+    try {
+        const docRef = doc(db, "likes", `news_${newsId}`);
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists()) {
+            return docSnap.data().count;
+        } else {
+            // Si el documento no existe, lo creamos con 0 likes
+            await setDoc(docRef, { count: 0 });
+            return 0;
+        }
+    } catch (error) {
+        console.error("Error al obtener likes:", error);
+        return 0;
+    }
+}
+
+// Función para actualizar likes en Firebase
+async function updateLikes(newsId) {
+    try {
+        const docRef = doc(db, "likes", `news_${newsId}`);
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists()) {
+            const currentLikes = docSnap.data().count;
+            await updateDoc(docRef, {
+                count: currentLikes + 1
+            });
+            return currentLikes + 1;
+        } else {
+            // Si el documento no existe, lo creamos con 1 like
+            await setDoc(docRef, { count: 1 });
+            return 1;
+        }
+    } catch (error) {
+        console.error("Error al actualizar likes:", error);
+        return null;
+    }
+}
+
+// Función para crear tarjetas de noticias
+async function createNewsCard(news) {
+    const likes = await getLikes(news.id);
+    const likedClass = hasLiked(news.id) ? 'disabled' : '';
+    
+    return `
+        <div class="news-card" data-category="${news.category}">
+            <img class="news-image" src="${news.image}" alt="${news.title}">
+            <div class="news-content">
+                <div class="news-date">${news.date}</div>
+                <h3 class="news-title">${news.title}</h3>
+                <p class="news-description">${news.description}</p>
+                <a href="${news.image}" download="${news.title}" class="download-button">Descargar Imagen</a>
+                <button class="like-button ${likedClass}" onclick="handleLike(${news.id})">
+                    Me gusta
+                </button>
+                <div class="like-count" id="like-count-${news.id}">
+                    ${likes} Me gusta
                 </div>
-            `;
-        }
+            </div>
+        </div>
+    `;
+}
 
-        // Función para manejar el evento de dar like
-        async function handleLike(id) {
-            if (!hasLiked(id)) {
-                const newLikes = await updateLikesWithNetlify(id);
-                document.getElementById(`like-count-${id}`).innerText = `${newLikes} Me gusta`;
+// Función para manejar el evento de dar like
+async function handleLike(newsId) {
+    if (!hasLiked(newsId)) {
+        const newLikes = await updateLikes(newsId);
+        if (newLikes !== null) {
+            document.getElementById(`like-count-${newsId}`).textContent = `${newLikes} Me gusta`;
+            localStorage.setItem(`liked_${newsId}`, 'true');
+            const likeButton = document.querySelector(`[onclick="handleLike(${newsId})"]`);
+            if (likeButton) {
+                likeButton.classList.add('disabled');
             }
         }
+    }
+}
 
+// Función para verificar si ya se dio like
+function hasLiked(newsId) {
+    return localStorage.getItem(`liked_${newsId}`) === 'true';
+}
+
+// Función para renderizar todas las noticias
+async function renderNews() {
+    const newsGrid = document.querySelector('.news-grid');
+    newsGrid.innerHTML = ''; // Limpia el contenedor
+    
+    for (const news of newsData) {
+        const newsCardHTML = await createNewsCard(news);
+        newsGrid.innerHTML += newsCardHTML;
+    }
+}
+
+// Modificación de la función filterNews para trabajar con async/await
+async function filterNews(category) {
+    const newsGrid = document.querySelector('.news-grid');
+    const filteredNews = category === 'Todas las categorías'
+        ? newsData
+        : newsData.filter(news => news.category === category);
+    
+    filteredNews.sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+    newsGrid.innerHTML = ''; // Limpia el contenedor
+    for (const news of filteredNews) {
+        const newsCardHTML = await createNewsCard(news);
+        newsGrid.innerHTML += newsCardHTML;
+    }
+}
+
+// Inicializar las noticias
+window.onload = () => {
+    filterNews('Todas las categorías');
+};
+
+// Hacer las funciones disponibles globalmente
+window.handleLike = handleLike;
+window.filterNews = filterNews;
         // Generar el contenido de las noticias
         async function renderNews() {
             const newsGrid = document.querySelector('.news-grid');
@@ -1094,6 +1175,7 @@ searchInput.addEventListener('input', (e) => {
 });
     </script>
 
+</script>
 </body>
 
 </html
