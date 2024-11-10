@@ -978,42 +978,28 @@ menuLinks.forEach(link => {
 
         
     
-        // Sistema de likes actualizado para usar Netlify Functions
-        async function getLikesFromNetlify(id) {
-            try {
-                const response = await fetch(`functions/like?id=${id}`);
-                const data = await response.json();
-                return data.likes;
-            } catch (error) {
-                console.error("Error obteniendo likes:", error);
-                return localStorage.getItem(`likes_${id}`) || 0;
-            }
-        }
+        // Reemplaza todo el código relacionado con likes por este:
 
-        async function updateLikesWithNetlify(id) {
-            try {
-                const response = await fetch(`/.netlify/functions/like`, {
-                    method: "POST",
-                    body: JSON.stringify({ id: id })
-                });
-                const data = await response.json();
-                localStorage.setItem(`liked_${id}`, 'true');
-                return data.likes;
-            } catch (error) {
-                console.error("Error actualizando likes:", error);
-                const currentLikes = parseInt(localStorage.getItem(`likes_${id}`)) || 0;
-                localStorage.setItem(`likes_${id}`, currentLikes + 1);
-                return currentLikes + 1;
-            }
-        }
+// Sistema de likes simplificado
+function getLikes(id) {
+    return parseInt(localStorage.getItem(`likes_${id}`)) || 0;
+}
 
-        function hasLiked(id) {
-            return localStorage.getItem(`liked_${id}`) === 'true';
-        }
+function updateLikes(id) {
+    const currentLikes = getLikes(id);
+    const newLikes = currentLikes + 1;
+    localStorage.setItem(`likes_${id}`, newLikes);
+    localStorage.setItem(`liked_${id}`, 'true');
+    return newLikes;
+}
 
-        // Función actualizada para crear tarjetas de noticias
-        function createNewsCard(news) {
-    const likes = localStorage.getItem(`likes_${news.id}`) || 0;
+function hasLiked(id) {
+    return localStorage.getItem(`liked_${id}`) === 'true';
+}
+
+// Función actualizada para crear tarjetas de noticias
+function createNewsCard(news) {
+    const likes = getLikes(news.id);
     const likedClass = hasLiked(news.id) ? 'disabled' : '';
     return `
         <div class="news-card" data-category="${news.category}">
@@ -1023,21 +1009,23 @@ menuLinks.forEach(link => {
                 <h3 class="news-title">${news.title}</h3>
                 <p class="news-description">${news.description}</p>
                 <a href="${news.image}" download="${news.title}" class="download-button">Descargar Imagen</a>
-                <div class="like-button ${likedClass}" onclick="handleLike(${news.id})">Me gusta</div>
+                <button class="like-button ${likedClass}" onclick="handleLike(${news.id})">
+                    Me gusta
+                </button>
                 <div class="like-count" id="like-count-${news.id}">Likes: ${likes}</div>
             </div>
         </div>
     `;
 }
 
-        // Función actualizada para manejar likes
-        async function handleLike(id) {
-            if (!hasLiked(id)) {
-                const newLikes = await updateLikesWithNetlify(id);
-                document.getElementById(`like-count-${id}`).textContent = `Likes: ${newLikes}`;
-                document.querySelector(`[onclick="handleLike(${id})"]`).classList.add('disabled');
-            }
-        }
+// Función simplificada para manejar likes
+function handleLike(id) {
+    if (!hasLiked(id)) {
+        const newLikes = updateLikes(id);
+        document.getElementById(`like-count-${id}`).textContent = `Likes: ${newLikes}`;
+        document.querySelector(`[onclick="handleLike(${id})"]`).classList.add('disabled');
+    }
+}
 
 // Función para filtrar y ordenar noticias por fecha
 function filterNews(category) {
