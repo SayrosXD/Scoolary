@@ -1,18 +1,23 @@
 <?php
 // Configuración de la base de datos
-$host = 'scholary-luishebertosuarezflores-2522.d.aivencloud.com';
+$host = '192.168.1.3';
 $dbname = 'Count';
-$username = 'avnadmin';
-$password = 'AVNS_TpA1uNQyhiJ6IKizI6P';
-$port = 20421; // Especifica el puerto aquí
+$username = 'root';
+$password = 'root';
 
 try {
-    $pdo = new PDO("mysql:host=$host;port=$port;dbname=$dbname", $username, $password);
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
+    // Obtener los likes del usuario actual
+    $userIp = $_SERVER['REMOTE_ADDR'];
+    $stmt = $pdo->prepare("SELECT id FROM likes WHERE user_ip = ?");
+    $stmt->execute([$userIp]);
+    $userLikes = $stmt->fetchAll(PDO::FETCH_COLUMN);
 } catch(PDOException $e) {
     echo json_encode(['success' => false, 'error' => 'Error de conexión: ' . $e->getMessage()]);
-    die();
-}
+    $userLikes = [];
+} 
     
     // Obtener los likes del usuario actual
     $userIp = $_SERVER['REMOTE_ADDR'];
