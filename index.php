@@ -13,9 +13,16 @@ try {
     echo json_encode(['success' => false, 'error' => 'Error de conexión: ' . $e->getMessage()]);
     die();
 }
-
-// Guardar IP del usuario
-$userIp = $_SERVER['REMOTE_ADDR'];
+    
+    // Obtener los likes del usuario actual
+    $userIp = $_SERVER['REMOTE_ADDR'];
+    $stmt = $pdo->prepare("SELECT id FROM likes WHERE user_ip = ?");
+    $stmt->execute([$userIp]);
+    $userLikes = $stmt->fetchAll(PDO::FETCH_COLUMN);
+} catch(PDOException $e) {
+    echo json_encode(['success' => false, 'error' => 'Error de conexión: ' . $e->getMessage()]);
+    $userLikes = [];
+}
 
 // Manejador de likes
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -43,10 +50,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 	
-	 <script>
-        // Pasar los likes al JavaScript
-        const userLikes = <?php echo json_encode($userLikes); ?>;
-    </script>
 <!DOCTYPE html>
 
 <html lang="es">
@@ -733,6 +736,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
     <script>
+    	
+            // Pasar los likes al JavaScript (importante: debe ir antes del resto del código JS)
+const userLikes = <?php echo json_encode($userLikes); ?>; 
 
         // Manejo del menú lateral
 const menuIcon = document.querySelector('.menu-icon');
@@ -1085,36 +1091,42 @@ menuLinks.forEach(link => {
         });
     }
 
-    const newsData = [ /* ...tu array de datos de noticias... */ ];
-    function createNewsCard(news) {
-        return `
-            <div class="news-card" data-news-id="${news.id}" data-category="${news.category}">
-                <img class="news-image" src="${news.image}" alt="${news.title}">
-                <div class="news-content">
-                    <div class="news-date">${news.date}</div>
-                    <h3 class="news-title">${news.title}</h3>
-                    <p class="news-description">${news.description}</p>
-                    <a href="${news.image}" download="${news.title}" class="download-button">Descargar Imagen</a>
-                    <div class="like-container">
-                        <button class="like-button" onclick="handleLike(${news.id})">
-                            <svg viewBox="0 0 23 24">
-                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                            </svg>
-                        </button>
+    // Función para crear tarjeta de noticia
+        function createNewsCard(news) {
+            return `
+                <div class="news-card" data-news-id="${news.id}" data-category="${news.category}">
+                    <img class="news-image" src="${news.image}" alt="${news.title}">
+                    <div class="news-content">
+                        <div class="news-date">${news.date}</div>
+                        <h3 class="news-title">${news.title}</h3>
+                        <p class="news-description">${news.description}</p>
+                        <a href="${news.image}" download="${news.title}" class="download-button">Descargar Imagen</a>
+                        <div class="like-container">
+                            <button class="like-button ${userLikes.includes(news.id) ? 'liked' : ''}" onclick="handleLike(${news.id})">
+                                <svg viewBox="0 0 23 24">
+                                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
-        `;
-    }
+            `;
+       } 
 
-    function filterNews(category) {
-        const newsGrid = document.querySelector('.news-grid');
-        const filteredNews = category === 'Todas las categorías'
-            ? newsData
-            : newsData.filter(news => news.category === category);
-        filteredNews.sort((a, b) => new Date(b.date) - new Date(a.date));
-        newsGrid.innerHTML = filteredNews.map(createNewsCard).join('');
-    }
+        // Función para filtrar noticias
+        function filterNews(category) {
+            const newsGrid = document.querySelector('.news-grid');
+            const filteredNews = category === 'Todas las categorías'
+                ? newsData
+                : newsData.filter(news => news.category === category);
+            filteredNews.sort((a, b) => new Date(b.date) - new Date(a.date));
+            newsGrid.innerHTML = filteredNews.map(createNewsCard).join('');
+        }
+
+        // Inicializar la página con todas las noticias
+        document.addEventListener('DOMContentLoaded', () => {
+            filterNews('Todas las categorías');
+        });
 
     filterNews('Todas las categorías');
 
