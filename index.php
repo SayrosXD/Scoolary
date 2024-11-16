@@ -1,3 +1,4 @@
+
 <?php
 // Configuración de la base de datos
 $host = 'scholary-luishebertosuarezflores-2522.d.aivencloud.com';
@@ -6,12 +7,34 @@ $username = 'avnadmin';
 $password = 'AVNS_TpA1uNQyhiJ6IKizI6P';
 $port = 20421; // Especifica el puerto aquí
 
+// Función para obtener la IP real del usuario
+function getRealIp() {
+    $headers = [
+        'HTTP_X_FORWARDED_FOR',
+        'HTTP_CLIENT_IP',
+        'HTTP_CF_CONNECTING_IP', // Si usas Cloudflare
+        'REMOTE_ADDR'
+    ];
+
+    foreach ($headers as $header) {
+        if (!empty($_SERVER[$header])) {
+            if ($header === 'HTTP_X_FORWARDED_FOR') {
+                $ipList = explode(',', $_SERVER[$header]);
+                return trim($ipList[0]);
+            }
+            return $_SERVER[$header];
+        }
+    }
+
+    return 'UNKNOWN';
+}
+
 try {
     $pdo = new PDO("mysql:host=$host;port=$port;dbname=$dbname", $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
+
     // Obtener los likes del usuario actual
-    $userIp = $_SERVER['REMOTE_ADDR'];
+    $userIp = getRealIp();
     $stmt = $pdo->prepare("SELECT id FROM likes WHERE user_ip = ?");
     $stmt->execute([$userIp]);
     $userLikes = $stmt->fetchAll(PDO::FETCH_COLUMN);
@@ -45,6 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 ?>
+
 	
 <!DOCTYPE html>
 
