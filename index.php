@@ -874,7 +874,7 @@ menuLinks.forEach(link => {
             {
 
                 id: 3,
-                image: 'Certamen.jpg',
+                image: 'certamen.jpg',
 
                 date: '2024-08-29',
 
