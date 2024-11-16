@@ -9,20 +9,6 @@ $port = 20421; // Especifica el puerto aquí
 try {
     $pdo = new PDO("mysql:host=$host;port=$port;dbname=$dbname", $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch(PDOException $e) {
-    echo json_encode(['success' => false, 'error' => 'Error de conexión: ' . $e->getMessage()]);
-    die();
-}
-    
-    // Obtener los likes del usuario actual
-    $userIp = $_SERVER['REMOTE_ADDR'];
-    $stmt = $pdo->prepare("SELECT id FROM likes WHERE user_ip = ?");
-    $stmt->execute([$userIp]);
-    $userLikes = $stmt->fetchAll(PDO::FETCH_COLUMN);
-} catch(PDOException $e) {
-    echo json_encode(['success' => false, 'error' => 'Error de conexión: ' . $e->getMessage()]);
-    $userLikes = [];
-} 
     
     // Obtener los likes del usuario actual
     $userIp = $_SERVER['REMOTE_ADDR'];
