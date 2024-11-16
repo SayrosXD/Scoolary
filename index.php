@@ -632,7 +632,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="side-menu">
 
      <ul>
-      <li><a href="index.html">Página Principal</a></li>
+      <li><a href="index.php">Página Principal</a></li>
       <li><a href="sobre-nosotros.html">Sobre Nosotros</a></li>
       <li><a href="Recursos-utilizados.html">Recursos utilizados</a></li>
       <li><a href="Anuncios.html">Anuncios</a></li>
