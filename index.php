@@ -1,18 +1,17 @@
-
 <?php
 // Configuración de la base de datos
 $host = 'scholary-luishebertosuarezflores-2522.d.aivencloud.com';
 $dbname = 'Count';
 $username = 'avnadmin';
 $password = 'AVNS_TpA1uNQyhiJ6IKizI6P';
-$port = 20421; // Especifica el puerto aquí
+$port = 20421;
 
 // Función para obtener la IP real del usuario
 function getRealIp() {
     $headers = [
         'HTTP_X_FORWARDED_FOR',
         'HTTP_CLIENT_IP',
-        'HTTP_CF_CONNECTING_IP', // Si usas Cloudflare
+        'HTTP_CF_CONNECTING_IP',
         'REMOTE_ADDR'
     ];
 
@@ -38,15 +37,12 @@ try {
     $stmt = $pdo->prepare("SELECT id FROM likes WHERE user_ip = ?");
     $stmt->execute([$userIp]);
     $userLikes = $stmt->fetchAll(PDO::FETCH_COLUMN);
-} catch(PDOException $e) {
-    echo json_encode(['success' => false, 'error' => 'Error de conexión: ' . $e->getMessage()]);
-    $userLikes = [];
-}
 
-// Obtener conteo de likes para cada noticia
+    // Obtener conteo de likes para cada noticia
     $stmt = $pdo->prepare("SELECT id, COUNT(*) as like_count FROM `likes` GROUP BY id");
     $stmt->execute();
     $likeCounts = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+
 } catch(PDOException $e) {
     echo json_encode(['success' => false, 'error' => 'Error de conexión: ' . $e->getMessage()]);
     $userLikes = [];
@@ -64,28 +60,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$id, $userIp]);
 
         if (!$stmt->fetch(PDO::FETCH_ASSOC)) {
+            // Si no existe el like, lo insertamos
             $stmt = $pdo->prepare("INSERT INTO likes (id, user_ip) VALUES (?, ?)");
             $stmt->execute([$id, $userIp]);
-        } else {
-            $stmt = $pdo->prepare("DELETE FROM likes WHERE id = ? AND user_ip = ?");
-            $stmt->execute([$id, $userIp]);
-        }
-
-        echo json_encode(['success' => true]);
-    } catch(PDOException $e) {
-        echo json_encode(['success' => false, 'error' => 'Error al actualizar like: ' . $e->getMessage()]);
-    }
-    exit;
-}
-
-// Obtener nuevo conteo de likes
+            
+            // Obtener nuevo conteo de likes
             $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM `likes` WHERE id = ?");
             $stmt->execute([$id]);
             $newCount = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
             
             echo json_encode(['success' => true, 'liked' => true, 'count' => $newCount]);
         } else {
-            $stmt = $pdo->prepare("DELETE FROM `likes` WHERE id = ? AND user_ip = ?");
+            // Si existe el like, lo eliminamos
+            $stmt = $pdo->prepare("DELETE FROM likes WHERE id = ? AND user_ip = ?");
             $stmt->execute([$id, $userIp]);
             
             // Obtener nuevo conteo de likes
