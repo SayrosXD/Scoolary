@@ -4,14 +4,14 @@ $host = 'scholary-luishebertosuarezflores-2522.d.aivencloud.com';
 $dbname = 'Count';
 $username = 'avnadmin';
 $password = 'AVNS_TpA1uNQyhiJ6IKizI6P';
-$port = 20421; // Especifica el puerto aquí
+$port = 20421;
 
 // Función para obtener la IP real del usuario
 function getRealIp() {
     $headers = [
         'HTTP_X_FORWARDED_FOR',
         'HTTP_CLIENT_IP',
-        'HTTP_CF_CONNECTING_IP', // Si usas Cloudflare
+        'HTTP_CF_CONNECTING_IP',
         'REMOTE_ADDR'
     ];
 
@@ -36,11 +36,6 @@ try {
     // Obtener la IP del usuario
     $userIp = getRealIp();
     
-    // Procesar solicitudes POST
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $data = json_decode(file_get_contents('php://input'), true);
-        $id = $data['newsId'] ?? 0;
-
     // Obtener los likes del usuario actual
     $stmt = $pdo->prepare("SELECT id FROM likes WHERE user_ip = ?");
     $stmt->execute([$userIp]);
@@ -51,7 +46,7 @@ try {
     $stmt->execute();
     $likeCounts = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
 
-    // Manejador de likes
+    // Manejador de likes para solicitudes POST
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $data = json_decode(file_get_contents('php://input'), true);
         $id = $data['newsId'] ?? 0;
@@ -77,6 +72,7 @@ try {
         $newCount = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
 
         echo json_encode(['success' => true, 'liked' => !$hasLiked, 'count' => $newCount]);
+        exit;
     }
 } catch(PDOException $e) {
     // Manejar cualquier error relacionado con la base de datos
@@ -84,6 +80,7 @@ try {
     exit;
 }
 ?>
+
 	
 <!DOCTYPE html>
 
