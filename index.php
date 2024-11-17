@@ -80,8 +80,6 @@ try {
     exit;
 }
 ?>
-
-	
 <!DOCTYPE html>
 
 <html lang="es">
