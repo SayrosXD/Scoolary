@@ -4,14 +4,14 @@ $host = 'scholary-luishebertosuarezflores-2522.d.aivencloud.com';
 $dbname = 'Count';
 $username = 'avnadmin';
 $password = 'AVNS_TpA1uNQyhiJ6IKizI6P';
-$port = 20421;
+$port = 20421; // Especifica el puerto aquí
 
 // Función para obtener la IP real del usuario
 function getRealIp() {
     $headers = [
         'HTTP_X_FORWARDED_FOR',
         'HTTP_CLIENT_IP',
-        'HTTP_CF_CONNECTING_IP',
+        'HTTP_CF_CONNECTING_IP', // Si usas Cloudflare
         'REMOTE_ADDR'
     ];
 
@@ -29,62 +29,58 @@ function getRealIp() {
 }
 
 try {
+    // Conectar a la base de datos
     $pdo = new PDO("mysql:host=$host;port=$port;dbname=$dbname", $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // Obtener los likes del usuario actual
+    // Obtener la IP del usuario
     $userIp = getRealIp();
+    
+    // Procesar solicitudes POST
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $data = json_decode(file_get_contents('php://input'), true);
+        $id = $data['newsId'] ?? 0;
+
+    // Obtener los likes del usuario actual
     $stmt = $pdo->prepare("SELECT id FROM likes WHERE user_ip = ?");
     $stmt->execute([$userIp]);
     $userLikes = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
     // Obtener conteo de likes para cada noticia
-    $stmt = $pdo->prepare("SELECT id, COUNT(*) as like_count FROM `likes` GROUP BY id");
+    $stmt = $pdo->prepare("SELECT id, COUNT(*) as like_count FROM likes GROUP BY id");
     $stmt->execute();
     $likeCounts = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
 
-} catch(PDOException $e) {
-    echo json_encode(['success' => false, 'error' => 'Error de conexión: ' . $e->getMessage()]);
-    $userLikes = [];
-    $likeCounts = [];
-}
+    // Manejador de likes
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $data = json_decode(file_get_contents('php://input'), true);
+        $id = $data['newsId'] ?? 0;
 
-// Manejador de likes
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $data = json_decode(file_get_contents('php://input'), true);
-    $id = $data['newsId'] ?? 0;
-
-    try {
-        // Comprobar si ya existe un like del usuario
+        // Verificar si el usuario ya dio like
         $stmt = $pdo->prepare("SELECT 1 FROM likes WHERE id = ? AND user_ip = ?");
         $stmt->execute([$id, $userIp]);
+        $hasLiked = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if (!$stmt->fetch(PDO::FETCH_ASSOC)) {
-            // Si no existe el like, lo insertamos
+        if (!$hasLiked) {
+            // Agregar like
             $stmt = $pdo->prepare("INSERT INTO likes (id, user_ip) VALUES (?, ?)");
             $stmt->execute([$id, $userIp]);
-            
-            // Obtener nuevo conteo de likes
-            $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM `likes` WHERE id = ?");
-            $stmt->execute([$id]);
-            $newCount = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
-            
-            echo json_encode(['success' => true, 'liked' => true, 'count' => $newCount]);
         } else {
-            // Si existe el like, lo eliminamos
+            // Eliminar like
             $stmt = $pdo->prepare("DELETE FROM likes WHERE id = ? AND user_ip = ?");
             $stmt->execute([$id, $userIp]);
-            
-            // Obtener nuevo conteo de likes
-            $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM `likes` WHERE id = ?");
-            $stmt->execute([$id]);
-            $newCount = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
-            
-            echo json_encode(['success' => true, 'liked' => false, 'count' => $newCount]);
         }
-    } catch(PDOException $e) {
-        echo json_encode(['success' => false, 'error' => 'Error al actualizar like: ' . $e->getMessage()]);
+
+        // Obtener nuevo conteo
+        $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM likes WHERE id = ?");
+        $stmt->execute([$id]);
+        $newCount = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+
+        echo json_encode(['success' => true, 'liked' => !$hasLiked, 'count' => $newCount]);
     }
+} catch(PDOException $e) {
+    // Manejar cualquier error relacionado con la base de datos
+    echo json_encode(['success' => false, 'error' => 'Error: ' . $e->getMessage()]);
     exit;
 }
 ?>
