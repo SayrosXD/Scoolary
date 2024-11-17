@@ -43,6 +43,16 @@ try {
     $userLikes = [];
 }
 
+// Obtener conteo de likes para cada noticia
+    $stmt = $pdo->prepare("SELECT id, COUNT(*) as like_count FROM `likes` GROUP BY id");
+    $stmt->execute();
+    $likeCounts = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+} catch(PDOException $e) {
+    echo json_encode(['success' => false, 'error' => 'Error de conexión: ' . $e->getMessage()]);
+    $userLikes = [];
+    $likeCounts = [];
+}
+
 // Manejador de likes
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);
@@ -67,8 +77,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     exit;
 }
-?>
 
+// Obtener nuevo conteo de likes
+            $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM `likes` WHERE id = ?");
+            $stmt->execute([$id]);
+            $newCount = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+            
+            echo json_encode(['success' => true, 'liked' => true, 'count' => $newCount]);
+        } else {
+            $stmt = $pdo->prepare("DELETE FROM `likes` WHERE id = ? AND user_ip = ?");
+            $stmt->execute([$id, $userIp]);
+            
+            // Obtener nuevo conteo de likes
+            $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM `likes` WHERE id = ?");
+            $stmt->execute([$id]);
+            $newCount = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+            
+            echo json_encode(['success' => true, 'liked' => false, 'count' => $newCount]);
+        }
+    } catch(PDOException $e) {
+        echo json_encode(['success' => false, 'error' => 'Error al actualizar like: ' . $e->getMessage()]);
+    }
+    exit;
+}
+?>
 	
 <!DOCTYPE html>
 
@@ -132,8 +164,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     background-color: rgba(0, 0, 0, 0.5); /* Fondo semitransparente */
     z-index: 99;
 }
-    
-    
+
+
     .like-container {
         display: flex;
         align-items: center;
@@ -369,12 +401,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     text-align: center;
     margin: 0; /* Elimina cualquier margen superior o inferior */
     font-size: 2.5rem;
-            
+
         }
 
         .image-slider {
     margin-top: 0; /* Elimina cualquier margen superior */
-            
+
         }
 
 
@@ -388,7 +420,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         }
 
-    
+
 
 
         .slide {
@@ -557,7 +589,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         }
 
-    
+
     .download-button {
     display: inline-block;
     margin-top: 10px;
@@ -756,9 +788,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
     <script>
-    	
+
             // Pasar los likes al JavaScript (importante: debe ir antes del resto del código JS)
 const userLikes = <?php echo json_encode($userLikes); ?>; 
+const likeCounts = <?php echo json_encode($likeCounts); ?>;
 
         // Manejo del menú lateral
 const menuIcon = document.querySelector('.menu-icon');
@@ -853,14 +886,14 @@ menuLinks.forEach(link => {
                 category.classList.add('active');
 
                 filterNews(category.textContent);
-                
+
             });
 
         });
 
 
 
-        
+
 
         // Datos actualizados de noticias
 
@@ -1091,6 +1124,7 @@ menuLinks.forEach(link => {
     function handleLike(newsId) {
         const button = document.querySelector(`[data-news-id="${newsId}"] .like-button`);
         button.classList.toggle('liked');
+        const countSpan = container.querySelector('.like-count');
 
         // Enviar "like" o "unlike" al servidor (misma página)
         fetch('', {
@@ -1112,26 +1146,28 @@ menuLinks.forEach(link => {
     }
 
     // Función para crear tarjeta de noticia
-        function createNewsCard(news) {
-            return `
-                <div class="news-card" data-news-id="${news.id}" data-category="${news.category}">
-                    <img class="news-image" src="${news.image}" alt="${news.title}">
-                    <div class="news-content">
-                        <div class="news-date">${news.date}</div>
-                        <h3 class="news-title">${news.title}</h3>
-                        <p class="news-description">${news.description}</p>
-                        <a href="${news.image}" download="${news.title}" class="download-button">Descargar Imagen</a>
-                        <div class="like-container">
-                            <button class="like-button ${userLikes.includes(news.id) ? 'liked' : ''}" onclick="handleLike(${news.id})">
-                                <svg viewBox="0 0 23 24">
-                                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
+function createNewsCard(news) {
+    const likeCount = likeCounts[news.id] || 0;
+    return `
+        <div class="news-card" data-news-id="${news.id}" data-category="${news.category}">
+            <img class="news-image" src="${news.image}" alt="${news.title}">
+            <div class="news-content">
+                <div class="news-date">${news.date}</div>
+                <h3 class="news-title">${news.title}</h3>
+                <p class="news-description">${news.description}</p>
+                <a href="${news.image}" download="${news.title}" class="download-button">Descargar Imagen</a>
+                <div class="like-container">
+                    <button class="like-button ${userLikes.includes(news.id) ? 'liked' : ''}" onclick="handleLike(${news.id})">
+                        <svg viewBox="0 0 23 24">
+                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                        </svg>
+                    </button>
+                    <span class="like-count">${likeCount}</span>
                 </div>
-            `;
-       } 
+            </div>
+        </div>
+    `;
+}
 
         // Función para filtrar noticias
         function filterNews(category) {
@@ -1175,4 +1211,3 @@ menuLinks.forEach(link => {
         newsGrid.innerHTML = filteredNews.map(createNewsCard).join('');
     });
 </script>
- 
