@@ -1,17 +1,18 @@
+
 <?php
 // Configuración de la base de datos
 $host = 'scholary-luishebertosuarezflores-2522.d.aivencloud.com';
 $dbname = 'Count';
 $username = 'avnadmin';
 $password = 'AVNS_TpA1uNQyhiJ6IKizI6P';
-$port = 20421;
+$port = 20421; // Especifica el puerto aquí
 
 // Función para obtener la IP real del usuario
 function getRealIp() {
     $headers = [
         'HTTP_X_FORWARDED_FOR',
         'HTTP_CLIENT_IP',
-        'HTTP_CF_CONNECTING_IP',
+        'HTTP_CF_CONNECTING_IP', // Si usas Cloudflare
         'REMOTE_ADDR'
     ];
 
@@ -29,57 +30,46 @@ function getRealIp() {
 }
 
 try {
-    // Conectar a la base de datos
     $pdo = new PDO("mysql:host=$host;port=$port;dbname=$dbname", $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // Obtener la IP del usuario
-    $userIp = getRealIp();
-    
     // Obtener los likes del usuario actual
+    $userIp = getRealIp();
     $stmt = $pdo->prepare("SELECT id FROM likes WHERE user_ip = ?");
     $stmt->execute([$userIp]);
     $userLikes = $stmt->fetchAll(PDO::FETCH_COLUMN);
+} catch(PDOException $e) {
+    echo json_encode(['success' => false, 'error' => 'Error de conexión: ' . $e->getMessage()]);
+    $userLikes = [];
+}
 
-    // Obtener conteo de likes para cada noticia
-    $stmt = $pdo->prepare("SELECT id, COUNT(*) as like_count FROM likes GROUP BY id");
-    $stmt->execute();
-    $likeCounts = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+// Manejador de likes
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $data = json_decode(file_get_contents('php://input'), true);
+    $id = $data['newsId'] ?? 0;
 
-    // Manejador de likes para solicitudes POST
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $data = json_decode(file_get_contents('php://input'), true);
-        $id = $data['newsId'] ?? 0;
-
-        // Verificar si el usuario ya dio like
+    try {
+        // Comprobar si ya existe un like del usuario
         $stmt = $pdo->prepare("SELECT 1 FROM likes WHERE id = ? AND user_ip = ?");
         $stmt->execute([$id, $userIp]);
-        $hasLiked = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if (!$hasLiked) {
-            // Agregar like
+        if (!$stmt->fetch(PDO::FETCH_ASSOC)) {
             $stmt = $pdo->prepare("INSERT INTO likes (id, user_ip) VALUES (?, ?)");
             $stmt->execute([$id, $userIp]);
         } else {
-            // Eliminar like
             $stmt = $pdo->prepare("DELETE FROM likes WHERE id = ? AND user_ip = ?");
             $stmt->execute([$id, $userIp]);
         }
 
-        // Obtener nuevo conteo
-        $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM likes WHERE id = ?");
-        $stmt->execute([$id]);
-        $newCount = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
-
-        echo json_encode(['success' => true, 'liked' => !$hasLiked, 'count' => $newCount]);
-        exit;
+        echo json_encode(['success' => true]);
+    } catch(PDOException $e) {
+        echo json_encode(['success' => false, 'error' => 'Error al actualizar like: ' . $e->getMessage()]);
     }
-} catch(PDOException $e) {
-    // Manejar cualquier error relacionado con la base de datos
-    echo json_encode(['success' => false, 'error' => 'Error: ' . $e->getMessage()]);
     exit;
 }
 ?>
+
+	
 <!DOCTYPE html>
 
 <html lang="es">
@@ -142,8 +132,8 @@ try {
     background-color: rgba(0, 0, 0, 0.5); /* Fondo semitransparente */
     z-index: 99;
 }
-
-
+    
+    
     .like-container {
         display: flex;
         align-items: center;
@@ -379,12 +369,12 @@ try {
     text-align: center;
     margin: 0; /* Elimina cualquier margen superior o inferior */
     font-size: 2.5rem;
-
+            
         }
 
         .image-slider {
     margin-top: 0; /* Elimina cualquier margen superior */
-
+            
         }
 
 
@@ -398,7 +388,7 @@ try {
 
         }
 
-
+    
 
 
         .slide {
@@ -567,7 +557,7 @@ try {
 
         }
 
-
+    
     .download-button {
     display: inline-block;
     margin-top: 10px;
@@ -766,10 +756,9 @@ try {
 
 
     <script>
-
+    	
             // Pasar los likes al JavaScript (importante: debe ir antes del resto del código JS)
 const userLikes = <?php echo json_encode($userLikes); ?>; 
-const likeCounts = <?php echo json_encode($likeCounts); ?>;
 
         // Manejo del menú lateral
 const menuIcon = document.querySelector('.menu-icon');
@@ -864,14 +853,14 @@ menuLinks.forEach(link => {
                 category.classList.add('active');
 
                 filterNews(category.textContent);
-
+                
             });
 
         });
 
 
 
-
+        
 
         // Datos actualizados de noticias
 
@@ -1102,7 +1091,6 @@ menuLinks.forEach(link => {
     function handleLike(newsId) {
         const button = document.querySelector(`[data-news-id="${newsId}"] .like-button`);
         button.classList.toggle('liked');
-        const countSpan = container.querySelector('.like-count');
 
         // Enviar "like" o "unlike" al servidor (misma página)
         fetch('', {
@@ -1124,28 +1112,26 @@ menuLinks.forEach(link => {
     }
 
     // Función para crear tarjeta de noticia
-function createNewsCard(news) {
-    const likeCount = likeCounts[news.id] || 0;
-    return `
-        <div class="news-card" data-news-id="${news.id}" data-category="${news.category}">
-            <img class="news-image" src="${news.image}" alt="${news.title}">
-            <div class="news-content">
-                <div class="news-date">${news.date}</div>
-                <h3 class="news-title">${news.title}</h3>
-                <p class="news-description">${news.description}</p>
-                <a href="${news.image}" download="${news.title}" class="download-button">Descargar Imagen</a>
-                <div class="like-container">
-                    <button class="like-button ${userLikes.includes(news.id) ? 'liked' : ''}" onclick="handleLike(${news.id})">
-                        <svg viewBox="0 0 23 24">
-                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                        </svg>
-                    </button>
-                    <span class="like-count">${likeCount}</span>
+        function createNewsCard(news) {
+            return `
+                <div class="news-card" data-news-id="${news.id}" data-category="${news.category}">
+                    <img class="news-image" src="${news.image}" alt="${news.title}">
+                    <div class="news-content">
+                        <div class="news-date">${news.date}</div>
+                        <h3 class="news-title">${news.title}</h3>
+                        <p class="news-description">${news.description}</p>
+                        <a href="${news.image}" download="${news.title}" class="download-button">Descargar Imagen</a>
+                        <div class="like-container">
+                            <button class="like-button ${userLikes.includes(news.id) ? 'liked' : ''}" onclick="handleLike(${news.id})">
+                                <svg viewBox="0 0 23 24">
+                                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-    `;
-}
+            `;
+       } 
 
         // Función para filtrar noticias
         function filterNews(category) {
@@ -1189,3 +1175,4 @@ function createNewsCard(news) {
         newsGrid.innerHTML = filteredNews.map(createNewsCard).join('');
     });
 </script>
+ 
