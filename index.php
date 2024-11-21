@@ -1,5 +1,5 @@
 
-<?php
+<?php 
 // Configuración de la base de datos
 $host = 'scholary-luishebertosuarezflores-2522.d.aivencloud.com';
 $dbname = 'Count';
@@ -68,7 +68,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 ?>
-
 	
 <!DOCTYPE html>
 
@@ -132,8 +131,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     background-color: rgba(0, 0, 0, 0.5); /* Fondo semitransparente */
     z-index: 99;
 }
-    
-    
+
+
     .like-container {
         display: flex;
         align-items: center;
@@ -369,12 +368,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     text-align: center;
     margin: 0; /* Elimina cualquier margen superior o inferior */
     font-size: 2.5rem;
-            
+
         }
 
         .image-slider {
     margin-top: 0; /* Elimina cualquier margen superior */
-            
+
         }
 
 
@@ -388,7 +387,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         }
 
-    
+
 
 
         .slide {
@@ -557,7 +556,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         }
 
-    
+
     .download-button {
     display: inline-block;
     margin-top: 10px;
@@ -710,6 +709,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <span>Atletismo</span>
 
             <span>Cultural</span>
+            
+            <span>Generaciones</span>
+            
+            <span>Actividades escolares</span>
 
         </div>
 
@@ -756,7 +759,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
     <script>
-    	
+
             // Pasar los likes al JavaScript (importante: debe ir antes del resto del código JS)
 const userLikes = <?php echo json_encode($userLikes); ?>; 
 
@@ -853,14 +856,14 @@ menuLinks.forEach(link => {
                 category.classList.add('active');
 
                 filterNews(category.textContent);
-                
+
             });
 
         });
 
 
 
-        
+
 
         // Datos actualizados de noticias
 
@@ -1059,10 +1062,131 @@ menuLinks.forEach(link => {
                 category: 'Ajedrez'
 
             },
-
+            
             {
 
                 id: 14,
+                image: 'feria.jpg',
+
+                date: '2024-11-24',
+
+                title: 'Presentación de proyectos',
+
+                description: 'Feria de AEP con niños de 1 grado A y B',
+
+                category: 'Eventos escolares'
+
+            },
+            
+            {
+
+                id: 15,
+                image: 'Evento.jpg',
+
+                date: '2024-11-18',
+
+                title: 'El noveno día a la Purísima',
+
+                description: 'Turno matutino dimos por concluida el noveno día a la Purísima Inmaculada Concepción de María.
+Agradecemos al personal docente y padres de familia por el apoyo incondicional.',
+
+                category: 'evento religiosos'
+
+            },
+            
+            {
+
+                id: 16,
+                image: 'Juegos.jpg',
+
+                date: '2024-11-12',
+
+                title: 'Felicidades a nuestros estudiantes',
+
+                description: 'compitiendo en los juegos nacionales dirigidos por FIFA y MINED  Obteniendo tercer lugar a nivel nacional:Sinaí Cerrano Cáceres, Jackine Stefany García, Nicol Nazareth Mantilla Rodriguez',
+
+                category: 'Fútbol'
+
+            },
+            
+            {
+
+                id: 17,
+                image: 'Eventos(1).jpg',
+
+                date: '2024-11-08',
+
+                title: 'Coro voces de asís',
+
+                description: 'Coro Voces de Asís CIC obtuvo el Tercer Lugar a Nivel Municipal en el Segundo Sistema de Festivales Componente Música.',
+
+                category: 'Actividades escolares'
+
+            },
+            
+            {
+
+                id: 18,
+                image: 'Cultural(1).jpg',
+
+                date: '2024-11-08',
+
+                title: 'Festival de canto',
+
+                description: 'Primer lugar en festival de canto a nivel municipal.',
+
+                category: 'Cultural'
+
+            },
+            
+            {
+
+                id: 19,
+                image: 'Generacion.jpg',
+
+                date: '2023-12-02',
+
+                title: 'Generacion 2023',
+
+                description: 'Los estudiantes del año 2023 se gradúan en su promoción 2023.',
+
+                category: 'Generaciones'
+
+            },
+            
+            {
+
+                id: 20,
+                image: 'Generacion(2).jpg',
+
+                date: '2022-12-02',
+
+                title: 'Generacion 2022',
+
+                description: 'Los estudiantes del año 2022 se gradúan en su promoción 2022.',
+
+                category: 'Generaciones'
+
+            },
+            
+            {
+
+                id: 21,
+                image: 'Generacion(3).jpg',
+
+                date: '2021-12-02',
+
+                title: 'Generacion 2021',
+
+                description: 'Los estudiantes del año 2021 se gradúan en su promoción 2021.',
+
+                category: 'Generaciones'
+
+            },
+
+            {
+
+                id: 22,
                 image: 'Cultural.jpg',
 
                 date: '2024-10-09',
@@ -1175,4 +1299,3 @@ menuLinks.forEach(link => {
         newsGrid.innerHTML = filteredNews.map(createNewsCard).join('');
     });
 </script>
- 
