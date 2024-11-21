@@ -1,36 +1,74 @@
-<?php
+
+<?php 
 // Configuración de la base de datos
-$db_host = 'localhost';
-$db_user = 'root';
-$db_pass = 'root';
-$db_name = 'conexion';
+$host = 'scholary-luishebertosuarezflores-2522.d.aivencloud.com';
+$dbname = 'Count';
+$username = 'avnadmin';
+$password = 'AVNS_TpA1uNQyhiJ6IKizI6P';
+$port = 20421; // Especifica el puerto aquí
 
-// Crear conexión
-$conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
+// Función para obtener la IP real del usuario
+function getRealIp() {
+    $headers = [
+        'HTTP_X_FORWARDED_FOR',
+        'HTTP_CLIENT_IP',
+        'HTTP_CF_CONNECTING_IP', // Si usas Cloudflare
+        'REMOTE_ADDR'
+    ];
 
-// Verificar conexión
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
-// Configurar charset
-$conn->set_charset("utf8mb4");
-
-// Obtener los likes para cada noticia
-$likes_query = "SELECT news_id, COUNT(*) as likes FROM news_likes GROUP BY news_id";
-$likes_result = $conn->query($likes_query);
-$likes_data = [];
-
-if ($likes_result) {
-    while ($row = $likes_result->fetch_assoc()) {
-        $likes_data[$row['news_id']] = $row['likes'];
+    foreach ($headers as $header) {
+        if (!empty($_SERVER[$header])) {
+            if ($header === 'HTTP_X_FORWARDED_FOR') {
+                $ipList = explode(',', $_SERVER[$header]);
+                return trim($ipList[0]);
+            }
+            return $_SERVER[$header];
+        }
     }
+
+    return 'UNKNOWN';
 }
 
-// Convertir el array de likes a JSON para usarlo en JavaScript
-$likes_json = json_encode($likes_data);
-?>
+try {
+    $pdo = new PDO("mysql:host=$host;port=$port;dbname=$dbname", $username, $password);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
+    // Obtener los likes del usuario actual
+    $userIp = getRealIp();
+    $stmt = $pdo->prepare("SELECT id FROM likes WHERE user_ip = ?");
+    $stmt->execute([$userIp]);
+    $userLikes = $stmt->fetchAll(PDO::FETCH_COLUMN);
+} catch(PDOException $e) {
+    echo json_encode(['success' => false, 'error' => 'Error de conexión: ' . $e->getMessage()]);
+    $userLikes = [];
+}
+
+// Manejador de likes
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $data = json_decode(file_get_contents('php://input'), true);
+    $id = $data['newsId'] ?? 0;
+
+    try {
+        // Comprobar si ya existe un like del usuario
+        $stmt = $pdo->prepare("SELECT 1 FROM likes WHERE id = ? AND user_ip = ?");
+        $stmt->execute([$id, $userIp]);
+
+        if (!$stmt->fetch(PDO::FETCH_ASSOC)) {
+            $stmt = $pdo->prepare("INSERT INTO likes (id, user_ip) VALUES (?, ?)");
+            $stmt->execute([$id, $userIp]);
+        } else {
+            $stmt = $pdo->prepare("DELETE FROM likes WHERE id = ? AND user_ip = ?");
+            $stmt->execute([$id, $userIp]);
+        }
+
+        echo json_encode(['success' => true]);
+    } catch(PDOException $e) {
+        echo json_encode(['success' => false, 'error' => 'Error al actualizar like: ' . $e->getMessage()]);
+    }
+    exit;
+}
+?>
+	
 <!DOCTYPE html>
 
 <html lang="es">
@@ -93,8 +131,8 @@ $likes_json = json_encode($likes_data);
     background-color: rgba(0, 0, 0, 0.5); /* Fondo semitransparente */
     z-index: 99;
 }
-    
-    
+
+
     .like-container {
         display: flex;
         align-items: center;
@@ -330,12 +368,12 @@ $likes_json = json_encode($likes_data);
     text-align: center;
     margin: 0; /* Elimina cualquier margen superior o inferior */
     font-size: 2.5rem;
-            
+
         }
 
         .image-slider {
     margin-top: 0; /* Elimina cualquier margen superior */
-            
+
         }
 
 
@@ -349,7 +387,7 @@ $likes_json = json_encode($likes_data);
 
         }
 
-    
+
 
 
         .slide {
@@ -518,7 +556,7 @@ $likes_json = json_encode($likes_data);
 
         }
 
-    
+
     .download-button {
     display: inline-block;
     margin-top: 10px;
@@ -617,7 +655,7 @@ $likes_json = json_encode($likes_data);
     <div class="side-menu">
 
      <ul>
-      <li><a href="index.html">Página Principal</a></li>
+      <li><a href="index.php">Página Principal</a></li>
       <li><a href="sobre-nosotros.html">Sobre Nosotros</a></li>
       <li><a href="Recursos-utilizados.html">Recursos utilizados</a></li>
       <li><a href="Anuncios.html">Anuncios</a></li>
@@ -671,6 +709,12 @@ $likes_json = json_encode($likes_data);
             <span>Atletismo</span>
 
             <span>Cultural</span>
+            
+            <span>Generaciones</span>
+
+            <span>Eventos religiosos</span>
+            
+            <span>Actividades escolares</span>
 
         </div>
 
@@ -717,6 +761,9 @@ $likes_json = json_encode($likes_data);
 
 
     <script>
+
+            // Pasar los likes al JavaScript (importante: debe ir antes del resto del código JS)
+const userLikes = <?php echo json_encode($userLikes); ?>; 
 
         // Manejo del menú lateral
 const menuIcon = document.querySelector('.menu-icon');
@@ -811,15 +858,14 @@ menuLinks.forEach(link => {
                 category.classList.add('active');
 
                 filterNews(category.textContent);
-                
+
             });
 
         });
 
 
 
-        // Obtener los likes de PHP
-const likesData = <?php echo $likes_json; ?>;
+
 
         // Datos actualizados de noticias
 
@@ -837,8 +883,6 @@ const likesData = <?php echo $likes_json; ?>;
                 description: 'Final del torneo de ajedrez en honor a nuestra señora de la asuncion. Participantes destacados: Maveth Yoshua y Angel Gabriel, obteniendo primer y segundo lugar respectivamente.',
 
                 category: 'Ajedrez',
-                
-                likes: likesData[1] || 0  
             },
 
             {
@@ -853,15 +897,13 @@ const likesData = <?php echo $likes_json; ?>;
                 description: 'Felicitamos al equipo Sub-Campeón de la liga de fútbol-sala femenino. El equipo de Séptimo grado "C" logró ganar el partido con mucho esfuerzo y dedicación.',
 
                 category: 'Fútbol'
-                
-                likes: likesData[1] || 0  
 
             },
 
             {
 
                 id: 3,
-                image: 'Certamen.jpg',
+                image: 'certamen.jpg',
 
                 date: '2024-08-29',
 
@@ -870,8 +912,6 @@ const likesData = <?php echo $likes_json; ?>;
                 description: 'Ganadores del primer lugar a nivel departamental en el Certamen del Mejor Estudiante de Educación Primaria. Felicitaciones a Wesley Jareth iglesias y Cristina Nazareth Montalvan Gradiz.',
 
                 category: 'Certamen'
-                
-                likes: likesData[1] || 0  
 
             },
 
@@ -887,8 +927,6 @@ const likesData = <?php echo $likes_json; ?>;
                 description: 'Por obtener medalla de plata a nivel nacional en el torneo de taekwondo felicitamos al estudiante Angel Fabricio Martinez Sarantes.',
 
                 category: 'Taekwondo'
-                
-                likes: likesData[1] || 0  
 
             },
 
@@ -904,8 +942,6 @@ const likesData = <?php echo $likes_json; ?>;
                 description: 'Por obtener el primer lugar a nivel departamental en salto alto. Felicitaciones a Jorge Josue Caceres.',
 
                 category: 'Atletismo'
-                
-                likes: likesData[1] || 0  
 
             },
 
@@ -921,8 +957,6 @@ const likesData = <?php echo $likes_json; ?>;
                 description: 'En los juegos escolares se realizó la disciplina del judo. Marvin Jose Morales Almendarez obtuvo el tercer lugar en la etapa nacional.',
 
                 category: 'Taekwondo'
-                
-                likes: likesData[1] || 0  
 
             },
 
@@ -938,8 +972,6 @@ const likesData = <?php echo $likes_json; ?>;
                 description: 'Felicitamos a los estudiantes de Quinto año por ser campeones a nivel departamental en el torneo de basket.',
 
                 category: 'Basketball'
-                
-                likes: likesData[1] || 0  
 
             },
 
@@ -955,8 +987,6 @@ const likesData = <?php echo $likes_json; ?>;
                 description: 'Felicitaciones a los estudiantes de tercer año y cuarto año por su destacada participación en la etapa nacional en la liga del conocimiento vial.',
 
                 category: 'Certamen'
-                
-                likes: likesData[1] || 0  
 
             },
 
@@ -972,8 +1002,6 @@ const likesData = <?php echo $likes_json; ?>;
                 description: 'Felicitaciones a Valeria Naylea Perez Enriquez y Juan Francisco Muller Lopez, ganadores del primer lugar a nivel departamental en el certamen "Mejor estudiante de secundaria".',
 
                 category: 'Certamen'
-                
-                likes: likesData[1] || 0  
 
             },
 
@@ -989,8 +1017,6 @@ const likesData = <?php echo $likes_json; ?>;
                 description: 'Felicitamos a Luis Octavio Medina Sanchez por obtener el primer lugar a nivel departamental en el certamen.',
 
                 category: 'Certamen'
-                
-                likes: likesData[1] || 0  
 
             },
 
@@ -1006,8 +1032,6 @@ const likesData = <?php echo $likes_json; ?>;
                 description: 'Felicitamos a Christian Massiel Amador por obtener el tercer lugar a nivel nacional en el certamen "Mejor docente de educación secundaria".',
 
                 category: 'Certamen'
-                
-                likes: likesData[1] || 0  
 
             },
 
@@ -1023,8 +1047,6 @@ const likesData = <?php echo $likes_json; ?>;
                 description: 'Felicitamos a nuestra selección masculina por representarnos a nivel nacional con destacada participación.',
 
                 category: 'Fútbol'
-                
-                likes: likesData[1] || 0  
 
             },
 
@@ -1040,14 +1062,133 @@ const likesData = <?php echo $likes_json; ?>;
                 description: 'Felicitamos a Luis Heberto Suarez, Maveth Yoshua Lainez y Eduardo Jose Flores por haber representado a nueva segovia y nuestro colegio en la etapa nacional.',
 
                 category: 'Ajedrez'
-                
-                likes: likesData[1] || 0  
+
+            },
+            
+            {
+
+                id: 14,
+                image: 'feria.jpg',
+
+                date: '2024-11-24',
+
+                title: 'Presentación de proyectos',
+
+                description: 'Feria de AEP con niños de 1 grado A y B',
+
+                category: 'Eventos escolares'
+
+            },
+            
+            {
+
+                id: 15,
+                image: 'Evento.jpg',
+
+                date: '2024-11-18',
+
+                title: 'El noveno día a la Purísima',
+
+                description: 'Turno matutino dimos por concluida el noveno día a la Purísima Inmaculada Concepción de María.
+Agradecemos al personal docente y padres de familia por el apoyo incondicional.',
+
+                category: 'Eventos religiosos'
+
+            },
+            
+            {
+
+                id: 16,
+                image: 'Juegos.jpg',
+
+                date: '2024-11-12',
+
+                title: 'Felicidades a nuestros estudiantes',
+
+                description: 'compitiendo en los juegos nacionales dirigidos por FIFA y MINED  Obteniendo tercer lugar a nivel nacional:Sinaí Cerrano Cáceres, Jackine Stefany García, Nicol Nazareth Mantilla Rodriguez',
+
+                category: 'Fútbol'
+
+            },
+            
+            {
+
+                id: 17,
+                image: 'Eventos(1).jpg',
+
+                date: '2024-11-08',
+
+                title: 'Coro voces de asís',
+
+                description: 'Coro Voces de Asís CIC obtuvo el Tercer Lugar a Nivel Municipal en el Segundo Sistema de Festivales Componente Música.',
+
+                category: 'Actividades escolares'
+
+            },
+            
+            {
+
+                id: 18,
+                image: 'Cultural(1).jpg',
+
+                date: '2024-11-08',
+
+                title: 'Festival de canto',
+
+                description: 'Primer lugar en festival de canto a nivel municipal.',
+
+                category: 'Cultural'
+
+            },
+            
+            {
+
+                id: 19,
+                image: 'Generacion.jpg',
+
+                date: '2023-12-02',
+
+                title: 'Generacion 2023',
+
+                description: 'Los estudiantes del año 2023 se gradúan en su promoción 2023.',
+
+                category: 'Generaciones'
+
+            },
+            
+            {
+
+                id: 20,
+                image: 'Generacion(2).jpg',
+
+                date: '2022-12-02',
+
+                title: 'Generacion 2022',
+
+                description: 'Los estudiantes del año 2022 se gradúan en su promoción 2022.',
+
+                category: 'Generaciones'
+
+            },
+            
+            {
+
+                id: 21,
+                image: 'Generacion(3).jpg',
+
+                date: '2021-12-02',
+
+                title: 'Generacion 2021',
+
+                description: 'Los estudiantes del año 2021 se gradúan en su promoción 2021.',
+
+                category: 'Generaciones'
 
             },
 
             {
 
-                id: 14,
+                id: 22,
                 image: 'Cultural.jpg',
 
                 date: '2024-10-09',
@@ -1057,126 +1198,106 @@ const likesData = <?php echo $likes_json; ?>;
                 description: 'Felicitamos al grupo "Los heraldos del camino" por obtener el primer lugar en la etapa municipal del festival cultural.',
 
                 category: 'Cultural'
-                
-               likes: likesData[1] || 0   
 
             }
 
         ];
 
-        
-    
-        // Reemplaza todo el código relacionado con likes por este:
-
-// Función modificada para manejar likes
-async function handleLike(newsId, button) {
-    if (button.classList.contains('liked')) {
-        return; // Si ya dio like, no hacer nada
-    }
-
-    try {
-        const response = await fetch('like_handler.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: `news_id=${newsId}`
+    // Inicializar el estado de likes en base a los datos de userLikes obtenidos del servidor
+    document.addEventListener('DOMContentLoaded', () => {
+        userLikes.forEach(newsId => {
+            const button = document.querySelector(`[data-news-id="${newsId}"] .like-button`);
+            if (button) {
+                button.classList.add('liked');
+            }
         });
-        
-        const data = await response.json();
-        
-        if (data.success) {
+    });
 
-/ Función modificada para crear tarjetas de noticias
-function createNewsCard(news) {
-    const hasLiked = localStorage.getItem(`liked_${news.id}`) === 'true';
-    const likeButtonClass = hasLiked ? 'like-button liked' : 'like-button';
-    
-    return `
-        <div class="news-card" data-category="${news.category}" data-news-id="${news.id}">
-            <img class="news-image" src="${news.image}" alt="${news.title}">
-            <div class="news-content">
-                <div class="news-date">${news.date}</div>
-                <h3 class="news-title">${news.title}</h3>
-                <p class="news-description">${news.description}</p>
-                <a href="${news.image}" download="${news.title}" class="download-button">Descargar Imagen</a>
-                <div class="like-container">
-                    <button class="${likeButtonClass}" onclick="handleLike(${news.id}, this)">
-                        <svg viewBox="0 0 23 24">
-                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                        </svg>
-                    </button>
-                    <span class="like-count">${news.likes}</span>
-                </div>
-            </div>
-        </div>
-    `;
-}
+    // Función para manejar el cambio de "like" en el DOM y la base de datos
+    function handleLike(newsId) {
+        const button = document.querySelector(`[data-news-id="${newsId}"] .like-button`);
+        button.classList.toggle('liked');
 
-function handleLike(button) {
-    const container = button.closest('.like-container')
-    const countSpan = container.querySelector('.like-count');
-    countSpan.textContent = data.likes;
-    const currentLikes = parseInt(countSpan.textContent);
-    
-    if (!button.classList.contains('liked')) {
-        // Agregar like
-        countSpan.textContent = currentLikes + 1;
-        button.classList.add('liked');
-    } else {
-        // Quitar like
-        countSpan.textContent = currentLikes - 1;
-        button.classList.remove('liked');
+        // Enviar "like" o "unlike" al servidor (misma página)
+        fetch('', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ newsId: newsId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                console.error('Error al actualizar el like:', data.error);
+                button.classList.toggle('liked');  // revertir en caso de error
+            }
+        })
+        .catch(error => {
+            console.error('Error en el manejo de likes:', error);
+            button.classList.toggle('liked');  // revertir en caso de error
+        });
     }
-}
 
-// Función para filtrar y ordenar noticias por fecha
-function filterNews(category) {
-    const newsGrid = document.querySelector('.news-grid');
-    const filteredNews = category === 'Todas las categorías'
-        ? newsData
-        : newsData.filter(news => news.category === category);
-    
-    // Ordenar por fecha descendente
-    filteredNews.sort((a, b) => new Date(b.date) - new Date(a.date));
-    
-    newsGrid.innerHTML = filteredNews.map(createNewsCard).join('');
-}
+    // Función para crear tarjeta de noticia
+        function createNewsCard(news) {
+            return `
+                <div class="news-card" data-news-id="${news.id}" data-category="${news.category}">
+                    <img class="news-image" src="${news.image}" alt="${news.title}">
+                    <div class="news-content">
+                        <div class="news-date">${news.date}</div>
+                        <h3 class="news-title">${news.title}</h3>
+                        <p class="news-description">${news.description}</p>
+                        <a href="${news.image}" download="${news.title}" class="download-button">Descargar Imagen</a>
+                        <div class="like-container">
+                            <button class="like-button ${userLikes.includes(news.id) ? 'liked' : ''}" onclick="handleLike(${news.id})">
+                                <svg viewBox="0 0 23 24">
+                                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+       } 
 
-// Inicializar las noticias en la carga de la página
-filterNews('Todas las categorías');
+        // Función para filtrar noticias
+        function filterNews(category) {
+            const newsGrid = document.querySelector('.news-grid');
+            const filteredNews = category === 'Todas las categorías'
+                ? newsData
+                : newsData.filter(news => news.category === category);
+            filteredNews.sort((a, b) => new Date(b.date) - new Date(a.date));
+            newsGrid.innerHTML = filteredNews.map(createNewsCard).join('');
+        }
 
-// Búsqueda por fecha
-const dateInput = document.querySelector('#search-date');
-dateInput.addEventListener('change', (e) => {
-    const selectedDate = e.target.value;
-    const filteredNews = newsData
-        .filter(news => news.date === selectedDate)
-        .sort((a, b) => new Date(b.date) - new Date(a.date));
-    const newsGrid = document.querySelector('.news-grid');
-    newsGrid.innerHTML = filteredNews.map(createNewsCard).join('');
-});
+        // Inicializar la página con todas las noticias
+        document.addEventListener('DOMContentLoaded', () => {
+            filterNews('Todas las categorías');
+        });
 
-// Búsqueda por texto
-const searchInput = document.querySelector('.search-menu input[type="text"]');
-searchInput.addEventListener('input', (e) => {
-    const searchText = e.target.value.toLowerCase();
-    const activeCategory = document.querySelector('.categories .active').textContent;
+    filterNews('Todas las categorías');
 
-    const filteredNews = newsData
-        .filter(news => 
-            (activeCategory === 'Todas las categorías' || news.category === activeCategory) &&
-            (news.title.toLowerCase().includes(searchText) ||
-            news.description.toLowerCase().includes(searchText))
-        )
-        .sort((a, b) => new Date(b.date) - new Date(a.date));
+    const dateInput = document.querySelector('#search-date');
+    dateInput.addEventListener('change', (e) => {
+        const selectedDate = e.target.value;
+        const filteredNews = newsData
+            .filter(news => news.date === selectedDate)
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+        const newsGrid = document.querySelector('.news-grid');
+        newsGrid.innerHTML = filteredNews.map(createNewsCard).join('');
+    });
 
-    const newsGrid = document.querySelector('.news-grid');
-    newsGrid.innerHTML = filteredNews.map(createNewsCard).join('');
-});
-    </script>
-
-</body>
-
-</html
- 
+    const searchInput = document.querySelector('.search-menu input[type="text"]');
+    searchInput.addEventListener('input', (e) => {
+        const searchText = e.target.value.toLowerCase();
+        const activeCategory = document.querySelector('.categories .active').textContent;
+        const filteredNews = newsData
+            .filter(news => 
+                (activeCategory === 'Todas las categorías' || news.category === activeCategory) &&
+                (news.title.toLowerCase().includes(searchText) ||
+                news.description.toLowerCase().includes(searchText))
+            )
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+        const newsGrid = document.querySelector('.news-grid');
+        newsGrid.innerHTML = filteredNews.map(createNewsCard).join('');
+    });
+</script>
