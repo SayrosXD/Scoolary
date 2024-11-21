@@ -1,4 +1,3 @@
-
 <?php 
 // Configuración de la base de datos
 $host = 'scholary-luishebertosuarezflores-2522.d.aivencloud.com';
